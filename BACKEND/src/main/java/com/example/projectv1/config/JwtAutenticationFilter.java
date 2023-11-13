@@ -22,8 +22,6 @@ import java.security.Security;
 public class JwtAutenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-
-
     private final UserDetailsService userDetailsService;
 
     @Override
