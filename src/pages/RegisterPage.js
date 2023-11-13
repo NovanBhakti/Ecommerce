@@ -176,6 +176,9 @@ const RegisterPage = ({ loading, error, ...props }) => {
                       </button>
                     </div>
                   </form>
+                  <div>
+                    have Account? <Link to="/">Login</Link>
+                  </div>
                   {error && (
                     <Alert style={{ marginTop: "20px" }} variant="danger">
                       {error}
