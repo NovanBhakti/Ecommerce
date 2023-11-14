@@ -1,5 +1,8 @@
 package com.example.projectv1.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,44 +19,63 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.security.Security;
+import java.util.Collections;
 
 @Component
-@RequiredArgsConstructor // Lombok's annotation, it will create constructor with private final
+@RequiredArgsConstructor
 public class JwtAutenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
     @Override
-    protected void doFilterInternal(@NonNull HttpServletRequest request,
-                                    @NonNull HttpServletResponse response,
-                                    @NonNull FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        final String authHeader = request.getHeader("Authorization"); // authentication header of json, for jwt consist of algorithm and type which is JWT
+        final String authHeader = request.getHeader("Authorization");
         final String jwt;
-        final String userEmail;
 
-        if(authHeader == null || !authHeader.startsWith("Bearer ")){
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
-            return; // to stop the next filter process
+            return;
         }
-        jwt = authHeader.substring(7); // filtering string after 'Bearer ' string
-        userEmail = jwtService.extractUsername(jwt); // todo extract the user email from JWT token, need a class that can manipulate JWT token
 
-        if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null){
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-            if (jwtService.isTokenValid(jwt, userDetails)){
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                );
-                authenticationToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                );
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        jwt = authHeader.substring(7);
+
+        try {
+            String userEmail = jwtService.extractUsername(jwt);
+
+            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+                if (jwtService.isTokenValid(jwt, userDetails)) {
+                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+                    authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                }
             }
+        } catch (MalformedJwtException e) {
+            // Handle MalformedJwtException
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            writeJsonResponse(response, "Unauthorized: Malformed token");
+            return;
+        } catch (JwtException e) {
+            // Handle other JWT related exceptions
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            writeJsonResponse(response, "Unauthorized: JWT exception");
+            return;
         }
+
         filterChain.doFilter(request, response);
     }
+
+    private void writeJsonResponse(HttpServletResponse response, String message) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(mapper.writeValueAsString(Collections.singletonMap("error", message)));
+    }
 }
+

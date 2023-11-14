@@ -21,33 +21,14 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-//    public AuthenticationResponse register(RegisterRequest registerRequest) {
-//        String message;
-//        var user = User.builder()
-//                .firstName(registerRequest.getFirstName())
-//                .lastName(registerRequest.getLastName())
-//                .email(registerRequest.getEmail())
-//                .password(passwordEncoder.encode(registerRequest.getPassword()))
-//                .role(Role.USER)
-//                .build();
-//
-//        if (!(user.getEmail().endsWith("@gmail.com"))) {
-//            message = "Fail";
-//        } else {
-//            message = "Success";
-//            userRepository.save(user);
-//            var jwtToken = jwtService.generateToken(user);
-//            return AuthenticationResponse
-//                    .builder()
-//                    .token(jwtToken)
-//                    .message(message)
-//                    .build();
-//        }
-//        return AuthenticationResponse.builder().message(message).build();
-//    }
-
     public ResponseEntity<AuthenticationResponse> register(RegisterRequest registerRequest) {
-        String message = "Success";
+        String message;
+        if (userRepository.existsUserByEmail(registerRequest.getEmail())) {
+            message = "Email is already in use";
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(AuthenticationResponse.builder().message(message).build());
+        }
+
         var user = User.builder()
                 .firstName(registerRequest.getFirstName())
                 .lastName(registerRequest.getLastName())
@@ -63,6 +44,7 @@ public class AuthenticationService {
 
         userRepository.save(user);
         var jwtToken = jwtService.generateToken(user);
+        message = "Account Successfully Registered";
         return ResponseEntity.ok(AuthenticationResponse.builder().token(jwtToken).message(message).build());
     }
 

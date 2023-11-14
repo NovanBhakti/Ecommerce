@@ -1,10 +1,7 @@
 package com.example.projectv1.user;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,8 +20,9 @@ public class User implements UserDetails {
     @GeneratedValue //it will set the strategy to AUTO
     private Integer id;
 
+    @Getter
     private String firstName;
-
+    @Getter
     private String lastName;
 
     private String email;
@@ -64,4 +62,6 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true; // same
     }
+
+
 }
