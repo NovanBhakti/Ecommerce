@@ -59,7 +59,7 @@ public class JwtAutenticationFilter extends OncePerRequestFilter {
             }
         } catch (MalformedJwtException e) {
             // Handle MalformedJwtException
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             writeJsonResponse(response, "Unauthorized: Malformed token");
             return;
         } catch (JwtException e) {
