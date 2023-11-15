@@ -5,6 +5,10 @@ const getToken = () => {
   return localStorage.getItem("USER_KEY");
 };
 
+const getTokenLogin = () => {
+  return localStorage.getItem("LOGIN_KEY");
+};
+
 export const userLogin = (authRequest) => {
   return axios({
     method: "POST",
@@ -30,7 +34,7 @@ export const fetchUserData = (authRequest) => {
     method: "GET",
     url: `${process.env.hostUrl || "http://localhost:8080"}/api/v1/auth/home`,
     headers: {
-      Authorization: "Bearer " + getToken(),
+      Authorization: "Bearer " + getTokenLogin(),
     },
   });
 };

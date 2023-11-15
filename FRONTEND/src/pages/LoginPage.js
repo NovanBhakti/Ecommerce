@@ -1,6 +1,11 @@
 import react, { useState } from "react";
 import { connect } from "react-redux";
-import { authenticate, authFailure, authSuccess } from "../redux/authActions";
+import {
+  authenticate,
+  authFailure,
+  authSuccess,
+  authSuccessLogin,
+} from "../redux/authActions";
 import "./loginpage.css";
 import { userLogin } from "../api/authenticationService";
 import { Alert, Spinner } from "react-bootstrap";
@@ -33,7 +38,7 @@ const LoginPage = ({ loading, error, ...props }) => {
           switch (err.response.status) {
             case 401:
               console.log("401 status");
-              props.loginFailure("Authentication Failed.Bad Credentials");
+              props.loginFailure("Email Belum Terdaftar");
               break;
             default:
               props.loginFailure("Something Wrong!Please Try Again");
@@ -128,8 +133,12 @@ const LoginPage = ({ loading, error, ...props }) => {
                         </div>
                       </div>
 
-                      <div className="form-group m-0">
-                        <button type="submit" className="btn btn-primary">
+                      <div className="form-group m-0 text-center mb-2">
+                        <button
+                          type="submit"
+                          className="btn btn-primary rounded-pill"
+                          style={{ width: "100%" }}
+                        >
                           Login
                           {loading && (
                             <Spinner
@@ -149,7 +158,7 @@ const LoginPage = ({ loading, error, ...props }) => {
                         </button>
                       </div>
                     </form>
-                    <div>
+                    <div className="text-center">
                       Don't have Account? <Link to="/register">Register</Link>
                     </div>
                     {error && (
@@ -179,7 +188,7 @@ const mapStateToProps = ({ auth }) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     authenticate: () => dispatch(authenticate()),
-    setUser: (data) => dispatch(authSuccess(data)),
+    setUser: (data) => dispatch(authSuccessLogin(data)),
     loginFailure: (message) => dispatch(authFailure(message)),
   };
 };

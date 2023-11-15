@@ -29,7 +29,47 @@ export const Dashboard = (props) => {
       <Header />
       <Container>
         <MainWrapper>
-          <h4>Hello {data && `${data.firstName} ${data.lastName}`}</h4>
+          <h4 className="text-center">
+            Hello {data && `${data.firstName} ${data.lastName}`}
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            Hello {data && `${data.firstName} ${data.lastName}`}
+          </h4>
           <br></br>
           {data &&
             data.roles &&

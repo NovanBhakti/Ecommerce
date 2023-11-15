@@ -24,7 +24,7 @@ const RegisterPage = ({ loading, error, ...props }) => {
         console.log("response", response);
         if (response.status === 200) {
           props.setUser(response.data);
-          props.history.push("/");
+          props.history.push("/login");
         } else {
           props.loginFailure("Something Wrong!Please Try Again");
         }
@@ -165,8 +165,12 @@ const RegisterPage = ({ loading, error, ...props }) => {
                         </div>
                       </div>
 
-                      <div className="form-group m-0">
-                        <button type="submit" className="btn btn-primary">
+                      <div className="form-group m-0 text-center">
+                        <button
+                          type="submit"
+                          className="btn btn-primary rounded-pill"
+                          style={{ width: "100%" }}
+                        >
                           Register
                           {loading && (
                             <Spinner
@@ -186,8 +190,8 @@ const RegisterPage = ({ loading, error, ...props }) => {
                         </button>
                       </div>
                     </form>
-                    <div>
-                      have Account? <Link to="/">Login</Link>
+                    <div className="text-center mb-2">
+                      have Account? <Link to="/login">Login</Link>
                     </div>
                     {error && (
                       <Alert style={{ marginTop: "20px" }} variant="danger">

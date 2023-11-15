@@ -1,49 +1,94 @@
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
-import { Link, withRouter } from "react-router-dom/cjs/react-router-dom.min";
-import "./navbar.css";
+import {
+  Link,
+  withRouter,
+  NavLink,
+  useLocation,
+} from "react-router-dom/cjs/react-router-dom.min";
+import "../components/navbar.css";
 import { Button } from "react-bootstrap";
+import { useState } from "react";
 
 const Header = (props) => {
-  const user = localStorage.getItem("USER_KEY");
+  const user = localStorage.getItem("LOGIN_KEY");
+  const [expanded, setExpanded] = useState(false);
+  const location = useLocation();
 
   const logOut = () => {
     localStorage.clear();
-    props.history.push("/");
+    props.history.push("/login");
   };
 
   return (
     <>
-      <Navbar className="navbar">
+      <Navbar className="navbar shadow-sm sticky-top" expand="sm">
         <Container>
-          <Navbar.Brand href="/">Navbar</Navbar.Brand>
-          <Nav>
-            {user ? (
-              <>
-                <Link className="nav-link" to="/dashboard">
-                  Home
-                </Link>
-                <Button
-                  className="btn btn-primary rounded-pill "
-                  onClick={() => logOut()}
-                >
-                  Log Out
-                </Button>
-              </>
-            ) : (
-              <>
-                <Nav className="me-auto">
-                  <Link className="nav-link" to="/">
-                    Login
-                  </Link>
-                  <Link className="nav-link" to="/register">
-                    Register
-                  </Link>
-                </Nav>
-              </>
-            )}
-          </Nav>
+          <Navbar.Brand href="/dashboard">
+            <img src="./Gorgosaurus_BW_transparent.png" width={50} alt="Logo" />
+          </Navbar.Brand>
+          <Navbar.Toggle
+            aria-controls="basic-navbar-nav"
+            onClick={() => setExpanded(!expanded)}
+          />
+          <Navbar.Collapse
+            id="basic-navbar-nav"
+            className={expanded ? "show text-center" : "text-center"}
+          >
+            <Nav className="mx-auto">
+              {user ? (
+                <>
+                  <NavLink
+                    activeClassName="navbar__link--active"
+                    className="navbar__link animated fade-in"
+                    to="/dashboard"
+                  >
+                    Home
+                  </NavLink>
+                  <NavLink
+                    activeClassName="navbar__link--active"
+                    className="navbar__link animated fade-in"
+                    to="/test"
+                  >
+                    Test
+                  </NavLink>
+                </>
+              ) : null}
+            </Nav>
+            <Nav>
+              {user ? (
+                <>
+                  <button
+                    className="btn btn-outline-danger rounded-pill pb-2"
+                    type="button"
+                    onClick={() => logOut()}
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Nav className="">
+                    <NavLink
+                      activeClassName="navbar__link--active"
+                      className="navbar__link animated fade-in"
+                      to="/login"
+                    >
+                      Login
+                    </NavLink>
+                    <NavLink
+                      activeClassName="navbar__link--active"
+                      className="navbar__link animated fade-in"
+                      to="/register"
+                    >
+                      Register
+                    </NavLink>
+                  </Nav>
+                </>
+              )}
+            </Nav>
+          </Navbar.Collapse>
         </Container>
       </Navbar>
     </>
