@@ -5,6 +5,8 @@ import "./loginpage.css";
 import { userRegister } from "../api/authenticationService";
 import { Alert, Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom/cjs/react-router-dom.min";
+// import Navbar from "../components/Navbar";
+import Header from "../components/Header";
 
 const RegisterPage = ({ loading, error, ...props }) => {
   const [values, setValues] = useState({
@@ -55,141 +57,150 @@ const RegisterPage = ({ loading, error, ...props }) => {
   console.log("Loading ", loading);
 
   return (
-    <div className="login-page">
-      <section className="h-100">
-        <div className="container h-100">
-          <div className="row justify-content-md-center h-100">
-            <div className="card-wrapper">
-              <div className="card fat">
-                <div className="card-body">
-                  <h4 className="card-title">Register</h4>
+    <div>
+      <Header />
+      <div className="login-page">
+        <section className="h-100">
+          <div className="container h-100">
+            <div className="row justify-content-md-center h-100">
+              <div className="card-wrapper">
+                <div className="card fat">
+                  <div className="card-body">
+                    <h4 className="card-title">Register</h4>
 
-                  <form
-                    className="my-login-validation"
-                    onSubmit={handleSubmit}
-                    noValidate={false}
-                  >
-                    <div className="form-group">
-                      <label htmlFor="email">First Name</label>
-                      <input
-                        id="firstname"
-                        type="text"
-                        className="form-control"
-                        minLength={5}
-                        value={values.firstName}
-                        onChange={handleChange}
-                        name="firstName"
-                        required
-                      />
-
-                      <div className="invalid-feedback">UserId is invalid</div>
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="email">Last Name</label>
-                      <input
-                        id="lastname"
-                        type="text"
-                        className="form-control"
-                        minLength={5}
-                        value={values.lastName}
-                        onChange={handleChange}
-                        name="lastName"
-                        required
-                      />
-
-                      <div className="invalid-feedback">UserId is invalid</div>
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="email">Email</label>
-                      <input
-                        id="email"
-                        type="text"
-                        className="form-control"
-                        minLength={5}
-                        value={values.email}
-                        onChange={handleChange}
-                        name="email"
-                        required
-                      />
-
-                      <div className="invalid-feedback">UserId is invalid</div>
-                    </div>
-
-                    <div className="form-group">
-                      <label>
-                        Password
-                        <a href="forgot.html" className="float-right">
-                          Forgot Password?
-                        </a>
-                      </label>
-                      <input
-                        id="password"
-                        type="password"
-                        className="form-control"
-                        minLength={8}
-                        value={values.password}
-                        onChange={handleChange}
-                        name="password"
-                        required
-                      />
-                      <div className="invalid-feedback">
-                        Password is required
-                      </div>
-                    </div>
-
-                    <div className="form-group">
-                      <div className="custom-control custom-checkbox">
+                    <form
+                      className="my-login-validation"
+                      onSubmit={handleSubmit}
+                      noValidate={false}
+                    >
+                      <div className="form-group">
+                        <label htmlFor="email">First Name</label>
                         <input
-                          type="checkbox"
-                          className="custom-control-input"
-                          id="customCheck1"
+                          id="firstname"
+                          type="text"
+                          className="form-control"
+                          minLength={5}
+                          value={values.firstName}
+                          onChange={handleChange}
+                          name="firstName"
+                          required
                         />
-                        <label
-                          className="custom-control-label"
-                          htmlFor="customCheck1"
-                        >
-                          Remember me
-                        </label>
-                      </div>
-                    </div>
 
-                    <div className="form-group m-0">
-                      <button type="submit" className="btn btn-primary">
-                        Register
-                        {loading && (
-                          <Spinner
-                            as="span"
-                            animation="border"
-                            size="sm"
-                            role="status"
-                            aria-hidden="true"
+                        <div className="invalid-feedback">
+                          UserId is invalid
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="email">Last Name</label>
+                        <input
+                          id="lastname"
+                          type="text"
+                          className="form-control"
+                          minLength={5}
+                          value={values.lastName}
+                          onChange={handleChange}
+                          name="lastName"
+                          required
+                        />
+
+                        <div className="invalid-feedback">
+                          UserId is invalid
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="email">Email</label>
+                        <input
+                          id="email"
+                          type="text"
+                          className="form-control"
+                          minLength={5}
+                          value={values.email}
+                          onChange={handleChange}
+                          name="email"
+                          required
+                        />
+
+                        <div className="invalid-feedback">
+                          UserId is invalid
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <label>
+                          Password
+                          <a href="forgot.html" className="float-right">
+                            Forgot Password?
+                          </a>
+                        </label>
+                        <input
+                          id="password"
+                          type="password"
+                          className="form-control"
+                          minLength={8}
+                          value={values.password}
+                          onChange={handleChange}
+                          name="password"
+                          required
+                        />
+                        <div className="invalid-feedback">
+                          Password is required
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <div className="custom-control custom-checkbox">
+                          <input
+                            type="checkbox"
+                            className="custom-control-input"
+                            id="customCheck1"
                           />
-                        )}
-                        {/* <ClipLoader
+                          <label
+                            className="custom-control-label"
+                            htmlFor="customCheck1"
+                          >
+                            Remember me
+                          </label>
+                        </div>
+                      </div>
+
+                      <div className="form-group m-0">
+                        <button type="submit" className="btn btn-primary">
+                          Register
+                          {loading && (
+                            <Spinner
+                              as="span"
+                              animation="border"
+                              size="sm"
+                              role="status"
+                              aria-hidden="true"
+                            />
+                          )}
+                          {/* <ClipLoader
                                         //css={override}
                                         size={20}
                                         color={"#123abc"}
                                         loading={loading}
                                         /> */}
-                      </button>
+                        </button>
+                      </div>
+                    </form>
+                    <div>
+                      have Account? <Link to="/">Login</Link>
                     </div>
-                  </form>
-                  <div>
-                    have Account? <Link to="/">Login</Link>
+                    {error && (
+                      <Alert style={{ marginTop: "20px" }} variant="danger">
+                        {error}
+                      </Alert>
+                    )}
                   </div>
-                  {error && (
-                    <Alert style={{ marginTop: "20px" }} variant="danger">
-                      {error}
-                    </Alert>
-                  )}
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
     </div>
   );
 };

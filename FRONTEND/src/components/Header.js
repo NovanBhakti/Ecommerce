@@ -1,29 +1,33 @@
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
-import { Link } from "react-router-dom/cjs/react-router-dom.min";
+import { Link, withRouter } from "react-router-dom/cjs/react-router-dom.min";
 import "./navbar.css";
 import { Button } from "react-bootstrap";
 
-function navbar() {
+const Header = (props) => {
   const user = localStorage.getItem("USER_KEY");
 
   const logOut = () => {
     localStorage.clear();
-    history.push("/");
+    props.history.push("/");
   };
+
   return (
     <>
       <Navbar className="navbar">
         <Container>
-          <Navbar.Brand href="#home">Navbar</Navbar.Brand>
+          <Navbar.Brand href="/">Navbar</Navbar.Brand>
           <Nav>
             {user ? (
               <>
                 <Link className="nav-link" to="/dashboard">
                   Home
                 </Link>
-                <Button className="rounded" onClick={() => logOut()}>
+                <Button
+                  className="btn btn-primary rounded-pill "
+                  onClick={() => logOut()}
+                >
                   Log Out
                 </Button>
               </>
@@ -44,6 +48,6 @@ function navbar() {
       </Navbar>
     </>
   );
-}
+};
 
-export default navbar;
+export default withRouter(Header);

@@ -28,9 +28,7 @@ export const userRegister = (authRequest) => {
 export const fetchUserData = (authRequest) => {
   return axios({
     method: "GET",
-    url: `${
-      process.env.hostUrl || "http://localhost:8080"
-    }/api/v1/auth//api/v1/demo-controller`,
+    url: `${process.env.hostUrl || "http://localhost:8080"}/api/v1/auth/home`,
     headers: {
       Authorization: "Bearer " + getToken(),
     },
