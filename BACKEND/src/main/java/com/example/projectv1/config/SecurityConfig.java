@@ -28,9 +28,15 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/api/v1/auth/**").permitAll()
+                                .requestMatchers("api/v1/demo-controller/**").authenticated()
                                 .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .logout(logout -> logout
+                        .logoutUrl("/profile/logout")
+                        .logoutSuccessUrl("/sucess-logout")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID"));
         return httpSecurity.build();
     }
 }
