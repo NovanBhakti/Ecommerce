@@ -8,7 +8,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: create-drop #everytime the apps started it will create schema and drop when the app closed
+      ddl-auto: update #everytime the apps started it will create schema and drop when the app closed
     show-sql: true #everytime query is perform it will show the query
     properties:
       hibernate:

@@ -1,8 +1,11 @@
 package com.example.projectv1.user;
 
+import com.example.projectv1.config.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,6 +20,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final JavaMailSender javaMailSender;
 
     public ResponseEntity<UserResponse> showUserDetails(Authentication authentication) {
         try {
@@ -64,4 +69,34 @@ public class UserService {
         UserResponse errorResponse = UserResponse.builder().message("Failed to change password").build();
         return ResponseEntity.badRequest().body(errorResponse);
     }
+
+    private String generateResetToken(String email) {
+        return jwtService.generateResetToken(email);
+    }
+
+    private void sendResetEmail(String email, String resetToken) {
+        String resetLink = "http://localhost:8080/api/v1/auth/authenticated/change-password?token=" + resetToken;
+        String emailBody = "Click the link below to reset your password:\n" + resetLink;
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("Password Reset");
+        message.setText(emailBody);
+
+        javaMailSender.send(message);
+    }
+
+    public ResponseEntity<UserResponse> forgotPassword(ForgotPasswordRequest forgotPasswordRequest) {
+        if (!(userRepository.existsUserByEmail(forgotPasswordRequest.getEmail()))) {
+            String message = "Email doesn't exist";
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(UserResponse.builder().message(message).build());
+        }
+
+        String resetToken = generateResetToken(forgotPasswordRequest.getEmail());
+        sendResetEmail(forgotPasswordRequest.getEmail(), resetToken);
+        String message = "Password reset link sent successfully to the email";
+
+        return ResponseEntity.ok(UserResponse.builder().message(message).build());
+    }
+
 }
