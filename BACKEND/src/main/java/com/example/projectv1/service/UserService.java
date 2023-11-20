@@ -1,6 +1,9 @@
-package com.example.projectv1.user;
+package com.example.projectv1.service;
 
-import com.example.projectv1.config.JwtService;
+import com.example.projectv1.entity.*;
+import com.example.projectv1.request.ForgotPasswordRequest;
+import com.example.projectv1.request.ResetPasswordRequest;
+import com.example.projectv1.response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -75,7 +78,7 @@ public class UserService {
     }
 
     private void sendResetEmail(String email, String resetToken) {
-        String resetLink = "http://localhost:8080/api/v1/auth/authenticated/change-password?token=" + resetToken;
+        String resetLink = "http://localhost:8080/api/v1/auth/authenticated/reset-password?token=" + resetToken;
         String emailBody = "Click the link below to reset your password:\n" + resetLink;
 
         SimpleMailMessage message = new SimpleMailMessage();
@@ -99,4 +102,24 @@ public class UserService {
         return ResponseEntity.ok(UserResponse.builder().message(message).build());
     }
 
+    public ResponseEntity<UserResponse> resetPassword(ResetPasswordRequest resetPasswordRequest, Authentication authentication){
+
+            String email = authentication.getName();
+            Optional<User> userOptional = userRepository.findByEmail(email);
+
+            if (userOptional.isPresent()){
+                User user = userOptional.get();
+                if(resetPasswordRequest.getNewPassword()
+                        .equals(resetPasswordRequest.getConfirmPassword())){
+                    String encodedPassword = passwordEncoder.encode(resetPasswordRequest.getNewPassword());
+                    user.setPassword(encodedPassword);
+                    userRepository.save(user);
+                    return ResponseEntity.ok(UserResponse.builder().email(user.getEmail())
+                            .firstName(user.getFirstName())
+                            .lastName(user.getLastName()).message("Password successfully reset").build());
+                }
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(UserResponse.builder().message("Password doesn't match!").build());
+            }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(UserResponse.builder().message("User not found!").build());
+    }
 }

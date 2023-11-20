@@ -1,4 +1,4 @@
-package com.example.projectv1.user;
+package com.example.projectv1.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,9 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserResponse {
+public class AuthenticationRequest {
     private String email;
-    private String firstName;
-    private String lastName;
-    private String message;
+    String password;
 }

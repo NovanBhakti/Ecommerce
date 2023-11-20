@@ -1,4 +1,4 @@
-package com.example.projectv1.user;
+package com.example.projectv1.entity;
 
 // ENUM = enum is a special "class" that represents a group of constants (unchangeable variables, like final variables).
 //  EXAMPLE

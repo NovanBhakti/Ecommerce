@@ -1,5 +1,6 @@
 package com.example.projectv1.config;
 
+import com.example.projectv1.service.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.MalformedJwtException;

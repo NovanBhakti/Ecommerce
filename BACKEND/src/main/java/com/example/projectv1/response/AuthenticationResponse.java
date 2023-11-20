@@ -1,4 +1,4 @@
-package com.example.projectv1.auth;
+package com.example.projectv1.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

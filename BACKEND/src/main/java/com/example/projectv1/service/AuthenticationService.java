@@ -1,9 +1,11 @@
-package com.example.projectv1.auth;
+package com.example.projectv1.service;
 
-import com.example.projectv1.config.JwtService;
-import com.example.projectv1.user.Role;
-import com.example.projectv1.user.User;
-import com.example.projectv1.user.UserRepository;
+import com.example.projectv1.entity.Role;
+import com.example.projectv1.entity.User;
+import com.example.projectv1.entity.UserRepository;
+import com.example.projectv1.request.AuthenticationRequest;
+import com.example.projectv1.response.AuthenticationResponse;
+import com.example.projectv1.request.RegisterRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

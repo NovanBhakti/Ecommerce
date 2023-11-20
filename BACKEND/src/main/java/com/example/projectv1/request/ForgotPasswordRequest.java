@@ -1,4 +1,4 @@
-package com.example.projectv1.user;
+package com.example.projectv1.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChangePasswordRequest {
-    private String currentPassword;
-    private String newPassword;
+public class ForgotPasswordRequest {
+    private String email;
 }
