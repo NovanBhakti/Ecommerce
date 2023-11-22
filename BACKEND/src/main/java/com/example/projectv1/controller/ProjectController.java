@@ -48,13 +48,15 @@ public class ProjectController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<UserResponse> forgotPasswordMail(@RequestBody ForgotPasswordRequest forgotPasswordRequest, Authentication authentication) {
+    public ResponseEntity<UserResponse> forgotPasswordMail(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {
         return userService.forgotPassword(forgotPasswordRequest);
     }
 
-    @PostMapping("/authenticated/reset-password")
-    public ResponseEntity<UserResponse> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest, Authentication authentication){
-        return userService.resetPassword(resetPasswordRequest, authentication);
+    @PostMapping("/reset-password")
+    public ResponseEntity<UserResponse> resetPassword(@RequestParam String token, @RequestBody ResetPasswordRequest resetPasswordRequest){
+        String newPassword = resetPasswordRequest.getNewPassword();
+        String confirmPassword = resetPasswordRequest.getConfirmPassword();
+        return userService.resetPassword(token, newPassword, confirmPassword);
     }
 
 

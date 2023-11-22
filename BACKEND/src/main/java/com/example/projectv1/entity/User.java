@@ -6,6 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -28,6 +29,10 @@ public class User implements UserDetails {
     private String email;
 
     private String password;
+
+    private String resetPasswordToken;
+
+    private LocalDateTime resetPasswordTokenExpiry;
 
 //    after implementing UserDetails, add role => class type = ENUM, also add the annotation
     @Enumerated(EnumType.ORDINAL) //let JPA return value
