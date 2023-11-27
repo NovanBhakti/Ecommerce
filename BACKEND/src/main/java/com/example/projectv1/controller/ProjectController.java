@@ -12,11 +12,12 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-@CrossOrigin
 @RequiredArgsConstructor
 public class ProjectController {
 
+    private final UserService userService;
     private final AuthenticationService authenticationService;
+
 
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(
@@ -31,34 +32,15 @@ public class ProjectController {
         return authenticationService.authenticate(authenticationRequest);
     }
 
-    private final UserService userService;
-
-    @GetMapping("/authenticated/home")
-    public ResponseEntity<UserResponse> testHome(Authentication authentication) {
-        return userService.showUserDetails(authentication);
-    }
-
-    @PostMapping("/authenticated/change-password")
-    public ResponseEntity<UserResponse> changePassword(@RequestBody ChangePasswordRequest passwordRequest,
-                                                       Authentication authentication) {
-        String currentPassword = passwordRequest.getCurrentPassword();
-        String newPassword = passwordRequest.getNewPassword();
-
-        return userService.changePassword(currentPassword, newPassword, authentication);
-    }
-
     @PostMapping("/forgot-password")
     public ResponseEntity<UserResponse> forgotPasswordMail(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {
         return userService.forgotPassword(forgotPasswordRequest);
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<UserResponse> resetPassword(@RequestParam String token, @RequestBody ResetPasswordRequest resetPasswordRequest){
+    public ResponseEntity<UserResponse> resetPassword(@RequestParam String token, @RequestBody ResetPasswordRequest resetPasswordRequest) {
         String newPassword = resetPasswordRequest.getNewPassword();
         String confirmPassword = resetPasswordRequest.getConfirmPassword();
         return userService.resetPassword(token, newPassword, confirmPassword);
     }
-
-
-
 }
