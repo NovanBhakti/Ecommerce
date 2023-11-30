@@ -20,9 +20,9 @@ function navbar() {
           <Nav>
             {user ? (
               <>
-                <Link className="nav-link" to="/dashboard">
+                <NaLink className="nav-link" to="/dashboard">
                   Home
-                </Link>
+                </NaLink>
                 <Button className="rounded" onClick={() => logOut()}>
                   Log Out
                 </Button>

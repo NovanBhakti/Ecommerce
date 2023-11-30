@@ -1,4 +1,4 @@
-import react, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import {
   authenticate,
@@ -7,17 +7,24 @@ import {
   authSuccessLogin,
 } from "../redux/authActions";
 import "./loginpage.css";
-import { userLogin } from "../api/authenticationService";
+import {
+  userLogin,
+  fetchUserDataRememberMe,
+} from "../api/authenticationService";
 import { Alert, Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom/cjs/react-router-dom.min";
-import Navbar from "../components/Header";
 import Header from "../components/Header";
+import Swal from "sweetalert2";
 
 const LoginPage = ({ loading, error, ...props }) => {
   const [values, setValues] = useState({
     email: "",
     password: "",
   });
+
+  const [rememberMe, setRememberMe] = useState(false);
+  const [data, setData] = useState({});
+  let dataFetched = false;
 
   const handleSubmit = (evt) => {
     evt.preventDefault();
@@ -28,9 +35,23 @@ const LoginPage = ({ loading, error, ...props }) => {
         console.log("response", response);
         if (response.status === 200) {
           props.setUser(response.data);
+          if (rememberMe === true) {
+            localStorage.setItem("REMEMBER_ME", response.data.token);
+          } else {
+            localStorage.removeItem("REMEMBER_ME");
+          }
+          if (localStorage.getItem("USER_KEY")) {
+            localStorage.removeItem("USER_KEY");
+          }
           props.history.push("/dashboard");
         } else {
-          props.loginFailure("Something Wrong!Please Try Again");
+          Swal.fire({
+            position: "top-center",
+            icon: "error",
+            title: `${response.data.message}`,
+            showConfirmButton: false,
+            timer: 1500,
+          });
         }
       })
       .catch((err) => {
@@ -38,15 +59,41 @@ const LoginPage = ({ loading, error, ...props }) => {
           switch (err.response.status) {
             case 401:
               console.log("401 status");
-              props.loginFailure("Email Belum Terdaftar");
+              Swal.fire({
+                icon: "error",
+                title: `${err.response.data.message}`,
+                showConfirmButton: false,
+                timer: 1500,
+              });
+              break;
+            case 403:
+              console.log("403 status");
+              Swal.fire({
+                icon: "error",
+                title: `${err.response.data.message}`,
+                showConfirmButton: false,
+                timer: 1500,
+              });
               break;
             default:
-              props.loginFailure("Something Wrong!Please Try Again");
+              Swal.fire({
+                icon: "error",
+                title: `${err.response.data.message}`,
+                showConfirmButton: false,
+                timer: 1500,
+              });
+              break;
           }
         } else {
-          props.loginFailure("Something Wrong!Please Try Again");
+          Swal.fire({
+            icon: "error",
+            title: "SOMTHING WENT WRONG",
+            showConfirmButton: false,
+            timer: 1500,
+          });
         }
       });
+
     //console.log("Loading again",loading);
   };
 
@@ -58,7 +105,19 @@ const LoginPage = ({ loading, error, ...props }) => {
     }));
   };
 
-  console.log("Loading ", loading);
+  const handleRememberMeChange = () => {
+    setRememberMe(!rememberMe);
+  };
+
+  // if (localStorage.getItem("REMEMBER_ME") && !dataFetched) {
+  //   fetchUserDataRememberMe()
+  //     .then((response) => {
+  //       setData(response.data);
+  //     })
+  //     .catch((e) => {
+  //       console.error("Error fetching user data:");
+  //     });
+  // }
 
   return (
     <div>
@@ -77,45 +136,97 @@ const LoginPage = ({ loading, error, ...props }) => {
                       onSubmit={handleSubmit}
                       noValidate={false}
                     >
-                      <div className="form-group">
-                        <label htmlFor="email">email</label>
-                        <input
-                          id="email"
-                          type="text"
-                          className="form-control"
-                          minLength={5}
-                          value={values.email}
-                          onChange={handleChange}
-                          name="email"
-                          required
-                        />
+                      {localStorage.getItem("REMEMBER_ME") ? (
+                        <>
+                          <div className="form-group">
+                            <label htmlFor="email">email</label>
+                            <input
+                              id="email"
+                              type="text"
+                              className="form-control"
+                              minLength={5}
+                              value={data && `${data.email}`}
+                              onChange={handleChange}
+                              name="email"
+                              required
+                            />
 
-                        <div className="invalid-feedback">
-                          UserId is invalid
-                        </div>
-                      </div>
+                            <div className="invalid-feedback">
+                              UserId is invalid
+                            </div>
+                          </div>
 
-                      <div className="form-group">
-                        <label>
-                          Password
-                          <a href="forgot.html" className="float-right">
-                            Forgot Password?
-                          </a>
-                        </label>
-                        <input
-                          id="password"
-                          type="password"
-                          className="form-control"
-                          minLength={8}
-                          value={values.password}
-                          onChange={handleChange}
-                          name="password"
-                          required
-                        />
-                        <div className="invalid-feedback">
-                          Password is required
-                        </div>
-                      </div>
+                          <div className="form-group">
+                            <label>
+                              Password
+                              <Link
+                                to="/forgot-password"
+                                className="float-right"
+                              >
+                                Forgot Password?
+                              </Link>
+                            </label>
+                            <input
+                              id="password"
+                              type="password"
+                              className="form-control"
+                              minLength={8}
+                              value={data && `${data.password}`}
+                              onChange={handleChange}
+                              name="password"
+                              required
+                            />
+                            <div className="invalid-feedback">
+                              Password is required
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="form-group">
+                            <label htmlFor="email">email</label>
+                            <input
+                              id="email"
+                              type="text"
+                              className="form-control"
+                              minLength={5}
+                              value={values.email}
+                              onChange={handleChange}
+                              name="email"
+                              required
+                            />
+
+                            <div className="invalid-feedback">
+                              UserId is invalid
+                            </div>
+                          </div>
+
+                          <div className="form-group">
+                            <label>
+                              Password
+                              <Link
+                                to="/forgot-password"
+                                className="float-right"
+                              >
+                                Forgot Password?
+                              </Link>
+                            </label>
+                            <input
+                              id="password"
+                              type="password"
+                              className="form-control"
+                              minLength={8}
+                              value={values.password}
+                              onChange={handleChange}
+                              name="password"
+                              required
+                            />
+                            <div className="invalid-feedback">
+                              Password is required
+                            </div>
+                          </div>
+                        </>
+                      )}
 
                       <div className="form-group">
                         <div className="custom-control custom-checkbox">
@@ -123,6 +234,8 @@ const LoginPage = ({ loading, error, ...props }) => {
                             type="checkbox"
                             className="custom-control-input"
                             id="customCheck1"
+                            checked={rememberMe}
+                            onChange={handleRememberMeChange}
                           />
                           <label
                             className="custom-control-label"

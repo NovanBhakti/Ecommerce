@@ -3,6 +3,7 @@ import {
   AUTH_SUCCESS,
   AUTH_FAILURE,
   AUTH_SUCCESS_LOGIN,
+  AUTH_FORGOT,
 } from "../types";
 
 const initialState = {
@@ -28,6 +29,10 @@ const auth = (state = initialState, action) => {
     case AUTH_FAILURE:
       const error = action.payload;
       return { ...state, loading: false, error: error };
+
+    case AUTH_FORGOT:
+      const dataForgot = action.payload;
+      return { ...state, loading: false, error: "", user: dataForgot };
 
     default:
       return state;

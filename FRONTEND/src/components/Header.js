@@ -10,6 +10,7 @@ import {
 import "../components/navbar.css";
 import { Button } from "react-bootstrap";
 import { useState } from "react";
+import Swal from "sweetalert2";
 
 const Header = (props) => {
   const user = localStorage.getItem("LOGIN_KEY");
@@ -17,8 +18,18 @@ const Header = (props) => {
   const location = useLocation();
 
   const logOut = () => {
-    localStorage.clear();
-    props.history.push("/login");
+    Swal.fire({
+      title: "Are you sure want to exit?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      confirmButtonText: "Confirm",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        localStorage.removeItem("LOGIN_KEY");
+        props.history.push("/login");
+      }
+    });
   };
 
   return (

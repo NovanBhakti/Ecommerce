@@ -9,6 +9,10 @@ const getTokenLogin = () => {
   return localStorage.getItem("LOGIN_KEY");
 };
 
+const rememberMe = () => {
+  return localStorage.getItem("REMEMBER_ME");
+};
+
 export const userLogin = (authRequest) => {
   return axios({
     method: "POST",
@@ -33,8 +37,29 @@ export const fetchUserData = (authRequest) => {
   return axios({
     method: "GET",
     url: `${process.env.hostUrl || "http://localhost:8080"}/api/v1/auth/home`,
+    data: authRequest,
     headers: {
       Authorization: "Bearer " + getTokenLogin(),
     },
+  });
+};
+
+export const fetchUserDataRememberMe = (authRequest) => {
+  return axios({
+    method: "GET",
+    url: `${process.env.hostUrl || "http://localhost:8080"}/api/v1/auth/home`,
+    headers: {
+      Authorization: "Bearer " + rememberMe(),
+    },
+  });
+};
+
+export const fetchUserForgotPassword = (authRequest) => {
+  return axios({
+    method: "POST",
+    url: `${
+      process.env.hostUrl || "http://localhost:8080"
+    }/api/v1/auth/forgot-password`,
+    data: authRequest,
   });
 };

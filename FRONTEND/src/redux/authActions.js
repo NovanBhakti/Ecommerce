@@ -3,6 +3,7 @@ import {
   AUTH_SUCCESS,
   AUTH_FAILURE,
   AUTH_SUCCESS_LOGIN,
+  AUTH_FORGOT,
 } from "./types";
 
 export const authenticate = () => {
@@ -21,6 +22,7 @@ export const authSuccess = (content) => {
 
 export const authSuccessLogin = (content) => {
   localStorage.setItem("LOGIN_KEY", content.token);
+  localStorage.setItem("REMEMBER_ME", content.rememberMe);
   return {
     type: AUTH_SUCCESS_LOGIN,
     payload: content,
@@ -31,5 +33,12 @@ export const authFailure = (error) => {
   return {
     type: AUTH_FAILURE,
     payload: error,
+  };
+};
+
+export const forgotPassword = (content) => {
+  return {
+    type: AUTH_FORGOT,
+    payload: content,
   };
 };
