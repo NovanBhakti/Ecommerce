@@ -4,6 +4,7 @@ import com.example.projectv1.request.*;
 import com.example.projectv1.response.AuthenticationResponse;
 import com.example.projectv1.response.UserResponse;
 import com.example.projectv1.service.AuthenticationService;
+import com.example.projectv1.service.ForgotPasswordService;
 import com.example.projectv1.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ProjectController {
 
-    private final UserService userService;
+    private final ForgotPasswordService forgotPasswordService;
     private final AuthenticationService authenticationService;
 
 
@@ -34,13 +35,13 @@ public class ProjectController {
 
     @PostMapping("/forgot-password")
     public ResponseEntity<UserResponse> forgotPasswordMail(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {
-        return userService.forgotPassword(forgotPasswordRequest);
+        return forgotPasswordService.forgotPassword(forgotPasswordRequest);
     }
 
     @PostMapping("/reset-password")
     public ResponseEntity<UserResponse> resetPassword(@RequestParam String token, @RequestBody ResetPasswordRequest resetPasswordRequest) {
         String newPassword = resetPasswordRequest.getNewPassword();
         String confirmPassword = resetPasswordRequest.getConfirmPassword();
-        return userService.resetPassword(token, newPassword, confirmPassword);
+        return forgotPasswordService.resetPassword(token, newPassword, confirmPassword);
     }
 }

@@ -2,10 +2,15 @@ package com.example.projectv1.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Type;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.sql.Types;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -17,6 +22,11 @@ import java.util.List;
 @Entity
 @Table(name = "_user")
 public class User implements UserDetails {
+
+    @OneToOne(mappedBy = "user", cascade = {CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
+    @JoinColumn(name = "profile_picture_id") // Name of the foreign key column
+    private ProfilePicture profilePicture;
+
     @Id
     @GeneratedValue //it will set the strategy to AUTO
     private Integer id;
@@ -25,6 +35,18 @@ public class User implements UserDetails {
     private String firstName;
     @Getter
     private String lastName;
+
+    private LocalDate dob;
+
+    private String country;
+
+    private String state;
+
+    private String city;
+
+    private String address;
+
+    private String gender;
 
     private String email;
 
@@ -67,6 +89,5 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true; // same
     }
-
 
 }

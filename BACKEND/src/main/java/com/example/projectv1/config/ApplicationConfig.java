@@ -13,6 +13,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.NoSuchElementException;
+
 @Configuration
 @RequiredArgsConstructor
 public class ApplicationConfig {
@@ -24,7 +26,7 @@ public class ApplicationConfig {
         return new UserDetailsService() {
             @Override
             public UserDetails loadUserByUsername(String username){
-                return userRepository.findByEmail(username).orElseThrow();
+                return userRepository.findByEmail(username).orElseThrow(() -> new NoSuchElementException("User not found"));
             }
         };
     }

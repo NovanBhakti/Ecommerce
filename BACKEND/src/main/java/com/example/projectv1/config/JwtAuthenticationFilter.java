@@ -19,6 +19,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.NoSuchElementException;
 
 @Component
 @RequiredArgsConstructor
@@ -31,11 +32,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
+        final String requestURI = request.getRequestURI();
         final String jwt;
-
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
+        if (requestURI.startsWith("/api/v1/auth/authenticated")) {
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                writeJsonResponse(response, "Unauthorized: Missing or invalid Authorization header");
+                return;
+            }
+        } else if (!requestURI.startsWith("/api/v1/auth/authenticated")) {
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
         }
 
         jwt = authHeader.substring(7);
@@ -64,6 +73,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // Handle other JWT related exceptions
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             writeJsonResponse(response, "Unauthorized: User not found");
+            return;
+        } catch (NoSuchElementException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            writeJsonResponse(response, e.getMessage());
+            return;
+        } catch (IllegalStateException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            writeJsonResponse(response, e.getMessage());
+            return;
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            writeJsonResponse(response, "Internal Server Error");
             return;
         }
 
