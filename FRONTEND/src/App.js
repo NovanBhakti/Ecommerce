@@ -1,17 +1,17 @@
-import logo from "./logo.svg";
 import "./App.css";
-import { BrowserRouter, Switch, Route, Redirect } from "react-router-dom";
+import { BrowserRouter, Switch, Route } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import { Dashboard } from "./pages/dashboard/dashboard";
 import RegisterPage from "./pages/RegisterPage";
 import Test from "./pages/dashboard/Test";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetDescription from "./pages/ResetDescription";
+import ResetPassword from "./pages/ResetPassword";
 function App() {
-  const user = localStorage.getItem("LOGIN_KEY");
+  // const user = localStorage.getItem("LOGIN_KEY");
   return (
     <BrowserRouter>
-      {user ? (
+      {/* {user ? (
         <>
           <Redirect from="/" to="/dashboard" />
         </>
@@ -19,7 +19,7 @@ function App() {
         <>
           <Redirect from="/" to="/login" />
         </>
-      )}
+      )} */}
 
       <Switch>
         <Route exact path="/login" component={LoginPage} />
@@ -28,6 +28,7 @@ function App() {
         <Route exact path="/test" component={Test} />
         <Route exact path="/forgot-password" component={ForgotPassword} />
         <Route exact path="/resetdesc" component={ResetDescription} />
+        <Route exact path="/reset-password" component={ResetPassword} />
       </Switch>
     </BrowserRouter>
   );

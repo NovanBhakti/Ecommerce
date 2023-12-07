@@ -1,24 +1,11 @@
-import react, { useState } from "react";
+import { useState } from "react";
 import { connect } from "react-redux";
-import {
-  authenticate,
-  authFailure,
-  authSuccess,
-  forgotPassword,
-} from "../redux/authActions";
+import { forgotPassword } from "../redux/authActions";
 import "./loginpage.css";
-import {
-  userRegister,
-  fetchUserForgotPassword,
-} from "../api/authenticationService";
-import { Alert, Spinner } from "react-bootstrap";
-import { Link } from "react-router-dom/cjs/react-router-dom.min";
-// import Navbar from "../components/Navbar";
+import { fetchUserForgotPassword } from "../api/authenticationService";
 import Header from "../components/Header";
 import Swal from "sweetalert2";
-// import withReactContent from "sweetalert2-react-content";
 
-// const MySwal = withReactContent(Swal);
 const ForgotPassword = ({ loading, error, ...props }) => {
   const [values, setValues] = useState({
     email: "",
@@ -29,7 +16,6 @@ const ForgotPassword = ({ loading, error, ...props }) => {
 
     fetchUserForgotPassword(values)
       .then((response) => {
-        console.log("response", response);
         if (response.status === 200) {
           props.setUser(response.data);
           Swal.fire({
@@ -90,7 +76,6 @@ const ForgotPassword = ({ loading, error, ...props }) => {
           });
         }
       });
-    //console.log("Loading again",loading);
   };
 
   const handleChange = (e) => {
@@ -100,8 +85,6 @@ const ForgotPassword = ({ loading, error, ...props }) => {
       [e.target.name]: e.target.value,
     }));
   };
-
-  console.log("Loading ", loading);
 
   return (
     <div>
@@ -174,7 +157,6 @@ const ForgotPassword = ({ loading, error, ...props }) => {
 };
 
 const mapStateToProps = ({ auth }) => {
-  console.log("state ", auth);
   return {
     loading: auth.loading,
     error: auth.error,

@@ -3,14 +3,10 @@ import { connect } from "react-redux";
 import {
   authenticate,
   authFailure,
-  authSuccess,
   authSuccessLogin,
 } from "../redux/authActions";
 import "./loginpage.css";
-import {
-  userLogin,
-  fetchUserDataRememberMe,
-} from "../api/authenticationService";
+import { userLogin } from "../api/authenticationService";
 import { Alert, Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom/cjs/react-router-dom.min";
 import Header from "../components/Header";
@@ -32,7 +28,6 @@ const LoginPage = ({ loading, error, ...props }) => {
 
     userLogin(values)
       .then((response) => {
-        console.log("response", response);
         if (response.status === 200) {
           props.setUser(response.data);
           if (rememberMe === true) {
@@ -93,8 +88,6 @@ const LoginPage = ({ loading, error, ...props }) => {
           });
         }
       });
-
-    //console.log("Loading again",loading);
   };
 
   const handleChange = (e) => {
@@ -291,7 +284,6 @@ const LoginPage = ({ loading, error, ...props }) => {
 };
 
 const mapStateToProps = ({ auth }) => {
-  console.log("state ", auth);
   return {
     loading: auth.loading,
     error: auth.error,

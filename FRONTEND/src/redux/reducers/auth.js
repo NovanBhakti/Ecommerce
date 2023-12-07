@@ -4,6 +4,7 @@ import {
   AUTH_FAILURE,
   AUTH_SUCCESS_LOGIN,
   AUTH_FORGOT,
+  AUTH_RESET,
 } from "../types";
 
 const initialState = {
@@ -13,7 +14,6 @@ const initialState = {
 };
 
 const auth = (state = initialState, action) => {
-  console.log("Reducer auth");
   switch (action.type) {
     case AUTH_REQ:
       return { ...state, error: "", loading: true };
@@ -33,6 +33,10 @@ const auth = (state = initialState, action) => {
     case AUTH_FORGOT:
       const dataForgot = action.payload;
       return { ...state, loading: false, error: "", user: dataForgot };
+
+    case AUTH_RESET:
+      const dataReset = action.payload;
+      return { ...state, loading: false, error: "", user: dataReset };
 
     default:
       return state;

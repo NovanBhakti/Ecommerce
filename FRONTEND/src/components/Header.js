@@ -1,21 +1,38 @@
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
-import {
-  Link,
-  withRouter,
-  NavLink,
-  useLocation,
-} from "react-router-dom/cjs/react-router-dom.min";
+import { withRouter, NavLink } from "react-router-dom/cjs/react-router-dom.min";
 import "../components/navbar.css";
-import { Button } from "react-bootstrap";
-import { useState } from "react";
+import React, { useState } from "react";
 import Swal from "sweetalert2";
+import { fetchUserData } from "../api/authenticationService";
 
 const Header = (props) => {
   const user = localStorage.getItem("LOGIN_KEY");
   const [expanded, setExpanded] = useState(false);
-  const location = useLocation();
+  const [isDropdownOpen, setDropdownOpen] = useState(false);
+  const [data, setData] = useState({});
+  const handleAvatarClick = () => {
+    setDropdownOpen(!isDropdownOpen);
+  };
+
+  React.useEffect(() => {
+    let isMounted = true;
+    if (user != null) {
+      fetchUserData()
+        .then((response) => {
+          if (isMounted) {
+            setData(response.data);
+          }
+        })
+        .catch((e) => {
+          console.log("error");
+        });
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [user]);
 
   const logOut = () => {
     Swal.fire({
@@ -29,6 +46,9 @@ const Header = (props) => {
         localStorage.removeItem("LOGIN_KEY");
         props.history.push("/login");
       }
+      () => {
+        isMounted = false;
+      };
     });
   };
 
@@ -45,7 +65,7 @@ const Header = (props) => {
           />
           <Navbar.Collapse
             id="basic-navbar-nav"
-            className={expanded ? "show text-center" : "text-center"}
+            className={expanded ? "show text-end" : "text-end"}
           >
             <Nav className="mx-auto">
               {user ? (
@@ -70,13 +90,60 @@ const Header = (props) => {
             <Nav>
               {user ? (
                 <>
-                  <button
-                    className="btn btn-outline-danger rounded-pill pb-2"
-                    type="button"
-                    onClick={() => logOut()}
-                  >
-                    Logout
-                  </button>
+                  <div>
+                    <img
+                      src="https://mdbcdn.b-cdn.net/img/new/avatars/2.webp"
+                      className="rounded-circle"
+                      style={{ width: "50px", cursor: "pointer" }}
+                      alt="Avatar"
+                      onClick={handleAvatarClick}
+                    />
+
+                    {isDropdownOpen && (
+                      <div style={{ position: "relative" }}>
+                        <div
+                          style={{
+                            position: "fixed",
+                            top: 0,
+                            right: 0,
+                            bottom: 0,
+                            left: 0,
+                          }}
+                          onClick={() => setDropdownOpen(false)}
+                        />
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: "100%",
+                            right: 0,
+                            background: "#fff",
+                            border: "1px solid #ccc",
+                            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                            zIndex: 1000,
+                            borderRadius: "5px",
+                            marginTop: "10px",
+                            padding: "10px",
+                          }}
+                        >
+                          {/* Isi dropdown di sini */}
+                          <div className="px-4">
+                            <div>
+                              {data && `${data.firstName} ${data.lastName}`}
+                            </div>
+                            <div>
+                              <button
+                                className="btn btn-outline-danger rounded-pill pb-2"
+                                type="button"
+                                onClick={() => logOut()}
+                              >
+                                Logout
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </>
               ) : (
                 <>

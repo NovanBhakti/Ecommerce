@@ -4,6 +4,7 @@ import {
   AUTH_FAILURE,
   AUTH_SUCCESS_LOGIN,
   AUTH_FORGOT,
+  AUTH_RESET,
 } from "./types";
 
 export const authenticate = () => {
@@ -39,6 +40,13 @@ export const authFailure = (error) => {
 export const forgotPassword = (content) => {
   return {
     type: AUTH_FORGOT,
+    payload: content,
+  };
+};
+
+export const resetPassword = (content) => {
+  return {
+    type: AUTH_RESET,
     payload: content,
   };
 };

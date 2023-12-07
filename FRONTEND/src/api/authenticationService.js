@@ -36,7 +36,9 @@ export const userRegister = (authRequest) => {
 export const fetchUserData = (authRequest) => {
   return axios({
     method: "GET",
-    url: `${process.env.hostUrl || "http://localhost:8080"}/api/v1/auth/home`,
+    url: `${
+      process.env.hostUrl || "http://localhost:8080"
+    }/api/v1/auth/authenticated/home`,
     data: authRequest,
     headers: {
       Authorization: "Bearer " + getTokenLogin(),
@@ -60,6 +62,16 @@ export const fetchUserForgotPassword = (authRequest) => {
     url: `${
       process.env.hostUrl || "http://localhost:8080"
     }/api/v1/auth/forgot-password`,
+    data: authRequest,
+  });
+};
+
+export const fetchUserResetPassword = (authRequest, token) => {
+  return axios({
+    method: "POST",
+    url: `${
+      process.env.hostUrl || "http://localhost:8080"
+    }/api/v1/auth/reset-password?token=${token}`,
     data: authRequest,
   });
 };

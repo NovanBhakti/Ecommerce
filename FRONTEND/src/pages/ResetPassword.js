@@ -1,28 +1,24 @@
-import { useState } from "react";
+import react, { useState } from "react";
 import { connect } from "react-redux";
-import { authFailure, authSuccess } from "../redux/authActions";
+import { resetPassword } from "../redux/authActions";
 import "./loginpage.css";
-import { userRegister } from "../api/authenticationService";
-import { Alert, Spinner } from "react-bootstrap";
-import { Link } from "react-router-dom/cjs/react-router-dom.min";
-// import Navbar from "../components/Navbar";
-import Header from "../components/Header";
+import { fetchUserResetPassword } from "../api/authenticationService";
+import { Spinner } from "react-bootstrap";
 import Swal from "sweetalert2";
-// import withReactContent from "sweetalert2-react-content";
 
-// const MySwal = withReactContent(Swal);
-const RegisterPage = ({ loading, error, ...props }) => {
+const ResetPassword = ({ loading, error, ...props }) => {
   const [values, setValues] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
+    newPassword: "",
+    confirmPassword: "",
   });
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get("token");
 
   const handleSubmit = (evt) => {
     evt.preventDefault();
 
-    userRegister(values)
+    fetchUserResetPassword(values, token)
       .then((response) => {
         if (response.status === 200) {
           props.setUser(response.data);
@@ -49,6 +45,15 @@ const RegisterPage = ({ loading, error, ...props }) => {
           switch (err.response.status) {
             case 401:
               console.log("401 status");
+              Swal.fire({
+                icon: "error",
+                title: `${err.response.data.message}`,
+                showConfirmButton: false,
+                timer: 1500,
+              });
+              break;
+            case 403:
+              console.log("403 status");
               Swal.fire({
                 icon: "error",
                 title: `${err.response.data.message}`,
@@ -87,7 +92,6 @@ const RegisterPage = ({ loading, error, ...props }) => {
 
   return (
     <div>
-      <Header />
       <div className="login-page">
         <section className="h-100">
           <div className="container h-100">
@@ -95,7 +99,7 @@ const RegisterPage = ({ loading, error, ...props }) => {
               <div className="card-wrapper">
                 <div className="card fat">
                   <div className="card-body">
-                    <h4 className="card-title">Register</h4>
+                    <h4 className="card-title">Reset Password</h4>
 
                     <form
                       className="my-login-validation"
@@ -103,83 +107,41 @@ const RegisterPage = ({ loading, error, ...props }) => {
                       noValidate={false}
                     >
                       <div className="form-group">
-                        <label htmlFor="email">First Name</label>
+                        <label htmlFor="newPassword">New Password</label>
                         <input
-                          id="firstname"
-                          type="text"
-                          className="form-control"
-                          minLength={5}
-                          value={values.firstName}
-                          onChange={handleChange}
-                          name="firstName"
-                          required
-                        />
-
-                        <div className="invalid-feedback">
-                          UserId is invalid
-                        </div>
-                      </div>
-
-                      <div className="form-group">
-                        <label htmlFor="email">Last Name</label>
-                        <input
-                          id="lastname"
-                          type="text"
-                          className="form-control"
-                          minLength={5}
-                          value={values.lastName}
-                          onChange={handleChange}
-                          name="lastName"
-                          required
-                        />
-
-                        <div className="invalid-feedback">
-                          UserId is invalid
-                        </div>
-                      </div>
-
-                      <div className="form-group">
-                        <label htmlFor="email">Email</label>
-                        <input
-                          id="email"
-                          type="text"
-                          className="form-control"
-                          minLength={5}
-                          value={values.email}
-                          onChange={handleChange}
-                          name="email"
-                          required
-                        />
-
-                        <div className="invalid-feedback">
-                          UserId is invalid
-                        </div>
-                      </div>
-
-                      <div className="form-group">
-                        <label>Password</label>
-                        <input
-                          id="password"
+                          id="newPassword"
                           type="password"
                           className="form-control"
-                          minLength={8}
-                          value={values.password}
+                          minLength={5}
+                          value={values.newPassword}
                           onChange={handleChange}
-                          name="password"
+                          name="newPassword"
                           required
                         />
-                        <div className="invalid-feedback">
-                          Password is required
-                        </div>
                       </div>
 
-                      <div className="form-group mt-2 text-center">
+                      <div className="form-group">
+                        <label htmlFor="confirmPassword">
+                          Confirm Password
+                        </label>
+                        <input
+                          id="confirmPassword"
+                          type="password"
+                          className="form-control"
+                          minLength={5}
+                          value={values.confirmPassword}
+                          onChange={handleChange}
+                          name="confirmPassword"
+                          required
+                        />
+                      </div>
+                      <div className="form-group m-0 text-center">
                         <button
                           type="submit"
                           className="btn btn-primary rounded-pill"
                           style={{ width: "100%" }}
                         >
-                          Register
+                          Create New Password
                           {loading && (
                             <Spinner
                               as="span"
@@ -198,29 +160,6 @@ const RegisterPage = ({ loading, error, ...props }) => {
                         </button>
                       </div>
                     </form>
-                    <div className="text-center mb-2">
-                      have Account? <Link to="/login">Login</Link>
-                    </div>
-                    {props.registerFailure ? (
-                      <>
-                        {error && (
-                          <Alert style={{ marginTop: "20px" }} variant="danger">
-                            {error}
-                          </Alert>
-                        )}
-                      </>
-                    ) : (
-                      <>
-                        {user && (
-                          <Alert
-                            style={{ marginTop: "20px" }}
-                            variant="success"
-                          >
-                            {user}
-                          </Alert>
-                        )}
-                      </>
-                    )}
                   </div>
                 </div>
               </div>
@@ -241,10 +180,9 @@ const mapStateToProps = ({ auth }) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    setUser: (data) => dispatch(authSuccess(data)),
-    registerSuccess: (message) => dispatch(authSuccess(message)),
-    registerFailure: (message) => dispatch(authFailure(message)),
+    setUser: (data) => dispatch(resetPassword(data)),
+    resetSuccess: (message) => dispatch(resetPassword(message)),
   };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(RegisterPage);
+export default connect(mapStateToProps, mapDispatchToProps)(ResetPassword);

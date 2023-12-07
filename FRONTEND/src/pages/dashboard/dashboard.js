@@ -24,6 +24,7 @@ export const Dashboard = (props) => {
         props.history.push("/");
       });
   }, []);
+
   return (
     <div>
       <Header />
