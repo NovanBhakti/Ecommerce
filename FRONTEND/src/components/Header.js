@@ -1,7 +1,11 @@
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
-import { withRouter, NavLink } from "react-router-dom/cjs/react-router-dom.min";
+import {
+  withRouter,
+  NavLink,
+  Link,
+} from "react-router-dom/cjs/react-router-dom.min";
 import "../components/navbar.css";
 import React, { useState } from "react";
 import Swal from "sweetalert2";
@@ -22,7 +26,7 @@ const Header = (props) => {
       fetchUserData()
         .then((response) => {
           if (isMounted) {
-            setData(response.data);
+            setData(response.data.data);
           }
         })
         .catch((e) => {
@@ -126,10 +130,12 @@ const Header = (props) => {
                           }}
                         >
                           {/* Isi dropdown di sini */}
-                          <div className="px-4">
-                            <div>
-                              {data && `${data.firstName} ${data.lastName}`}
+                          <div className="text-center">
+                            <div className="">
+                              <div>{data && `${data.firstName}`}</div>
+                              <Link to="/update-profile">Update Profile</Link>
                             </div>
+
                             <div>
                               <button
                                 className="btn btn-outline-danger rounded-pill pb-2"

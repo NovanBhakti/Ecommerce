@@ -28,7 +28,7 @@ public class ForgotPasswordService {
     private final JavaMailSender javaMailSender;
 
     private ResponseEntity<?> sendResetEmail(String email, String resetToken) {
-        String resetLink = "http://localhost:8080/api/v1/auth/reset-password?token=" + resetToken;
+        String resetLink = "http://localhost:3000/reset-password?token=" + resetToken;
         String emailBody = "Click the link below to reset your password:\n" + resetLink;
 
         SimpleMailMessage mailMessage = new SimpleMailMessage();
@@ -41,7 +41,7 @@ public class ForgotPasswordService {
         } catch (MailException e) {
             return GlobalResponse.responseHandler("Failed to send mail.", HttpStatus.BAD_REQUEST, UserResponse.builder().build());
         }
-        return GlobalResponse.responseHandler("Email Sent", HttpStatus.BAD_REQUEST, UserResponse.builder().build());
+        return GlobalResponse.responseHandler("Email Sent", HttpStatus.OK, UserResponse.builder().build());
     }
 
     public ResponseEntity<?> forgotPassword(ForgotPasswordRequest forgotPasswordRequest) {
@@ -52,7 +52,7 @@ public class ForgotPasswordService {
         String resetToken = RandomString.make(30);
         sendResetEmail(forgotPasswordRequest.getEmail(), resetToken);
 
-        return GlobalResponse.responseHandler("Reset password link sent successfully to the email", HttpStatus.BAD_REQUEST, UserResponse.builder().build());
+        return GlobalResponse.responseHandler("Reset password link sent successfully to the email", HttpStatus.OK, UserResponse.builder().build());
     }
 
     public void updateResetPasswordToken(String token, String email) throws UsernameNotFoundException {

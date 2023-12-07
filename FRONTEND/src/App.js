@@ -7,6 +7,8 @@ import Test from "./pages/dashboard/Test";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetDescription from "./pages/ResetDescription";
 import ResetPassword from "./pages/ResetPassword";
+import Profile from "./pages/profile/Profile";
+
 function App() {
   // const user = localStorage.getItem("LOGIN_KEY");
   return (
@@ -29,6 +31,7 @@ function App() {
         <Route exact path="/forgot-password" component={ForgotPassword} />
         <Route exact path="/resetdesc" component={ResetDescription} />
         <Route exact path="/reset-password" component={ResetPassword} />
+        <Route exact path="/update-profile" component={Profile} />
       </Switch>
     </BrowserRouter>
   );

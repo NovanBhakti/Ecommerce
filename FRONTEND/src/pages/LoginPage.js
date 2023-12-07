@@ -29,7 +29,8 @@ const LoginPage = ({ loading, error, ...props }) => {
     userLogin(values)
       .then((response) => {
         if (response.status === 200) {
-          props.setUser(response.data);
+          console.log("response", response);
+          props.setUser(response.data.data);
           if (rememberMe === true) {
             localStorage.setItem("REMEMBER_ME", response.data.token);
           } else {

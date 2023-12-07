@@ -25,7 +25,7 @@ const RegisterPage = ({ loading, error, ...props }) => {
     userRegister(values)
       .then((response) => {
         if (response.status === 200) {
-          props.setUser(response.data);
+          props.setUser(response.data.data);
           Swal.fire({
             position: "top-center",
             icon: "success",

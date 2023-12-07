@@ -21,6 +21,7 @@ const ResetPassword = ({ loading, error, ...props }) => {
     fetchUserResetPassword(values, token)
       .then((response) => {
         if (response.status === 200) {
+          console.log(response.data);
           props.setUser(response.data);
           Swal.fire({
             position: "top-center",

@@ -30,7 +30,7 @@ public class AuthenticationService {
         if (userRepository.existsUserByEmail(registerRequest.getEmail())) {
             message = "Email " + registerRequest.getEmail() + " already in use";
             object = AuthenticationResponse.builder().build();
-            return GlobalResponse.responseHandler(message, HttpStatus.OK, object);
+            return GlobalResponse.responseHandler(message, HttpStatus.BAD_REQUEST, object);
         }
 
         var user = User.builder()

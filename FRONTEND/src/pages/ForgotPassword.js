@@ -10,6 +10,7 @@ const ForgotPassword = ({ loading, error, ...props }) => {
   const [values, setValues] = useState({
     email: "",
   });
+  const [data, setData] = useState({});
 
   const handleSubmit = (evt) => {
     evt.preventDefault();
@@ -17,7 +18,7 @@ const ForgotPassword = ({ loading, error, ...props }) => {
     fetchUserForgotPassword(values)
       .then((response) => {
         if (response.status === 200) {
-          props.setUser(response.data);
+          props.setUser(response.data.data);
           Swal.fire({
             position: "top-center",
             icon: "success",

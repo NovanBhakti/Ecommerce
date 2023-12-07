@@ -17,7 +17,8 @@ export const Dashboard = (props) => {
   React.useEffect(() => {
     fetchUserData()
       .then((response) => {
-        setData(response.data);
+        console.log(response.data);
+        setData(response.data.data);
       })
       .catch((e) => {
         localStorage.clear();
