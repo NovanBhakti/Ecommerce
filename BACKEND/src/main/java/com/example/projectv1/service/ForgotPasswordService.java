@@ -3,6 +3,7 @@ package com.example.projectv1.service;
 import com.example.projectv1.entity.User;
 import com.example.projectv1.entity.UserRepository;
 import com.example.projectv1.request.ForgotPasswordRequest;
+import com.example.projectv1.response.GlobalResponse;
 import com.example.projectv1.response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import net.bytebuddy.utility.RandomString;
@@ -25,34 +26,33 @@ import java.util.Optional;
 public class ForgotPasswordService {
     private final UserRepository userRepository;
     private final JavaMailSender javaMailSender;
-    private ResponseEntity<UserResponse> sendResetEmail(String email, String resetToken) {
+
+    private ResponseEntity<?> sendResetEmail(String email, String resetToken) {
         String resetLink = "http://localhost:8080/api/v1/auth/reset-password?token=" + resetToken;
         String emailBody = "Click the link below to reset your password:\n" + resetLink;
 
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-        message.setSubject("Password Reset");
-        message.setText(emailBody);
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(email);
+        mailMessage.setSubject("Password Reset");
+        mailMessage.setText(emailBody);
         try {
-            javaMailSender.send(message);
+            javaMailSender.send(mailMessage);
             updateResetPasswordToken(resetToken, email);
         } catch (MailException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(UserResponse.builder().message("Failed to send mail.").build());
+            return GlobalResponse.responseHandler("Failed to send mail.", HttpStatus.BAD_REQUEST, UserResponse.builder().build());
         }
-        return ResponseEntity.ok().body(UserResponse.builder().message("Success send email to " + email).build());
+        return GlobalResponse.responseHandler("Email Sent", HttpStatus.BAD_REQUEST, UserResponse.builder().build());
     }
 
-    public ResponseEntity<UserResponse> forgotPassword(ForgotPasswordRequest forgotPasswordRequest) {
+    public ResponseEntity<?> forgotPassword(ForgotPasswordRequest forgotPasswordRequest) {
         if (!(userRepository.existsUserByEmail(forgotPasswordRequest.getEmail()))) {
-            String message = "Email doesn't exist";
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(UserResponse.builder().message(message).build());
+            return GlobalResponse.responseHandler("Email doesn't exist", HttpStatus.BAD_REQUEST, UserResponse.builder().build());
         }
 
         String resetToken = RandomString.make(30);
         sendResetEmail(forgotPasswordRequest.getEmail(), resetToken);
-        String message = "Reset password link sent successfully to the email";
 
-        return ResponseEntity.ok(UserResponse.builder().message(message).build());
+        return GlobalResponse.responseHandler("Reset password link sent successfully to the email", HttpStatus.BAD_REQUEST, UserResponse.builder().build());
     }
 
     public void updateResetPasswordToken(String token, String email) throws UsernameNotFoundException {
@@ -83,7 +83,7 @@ public class ForgotPasswordService {
         return LocalDateTime.now().isBefore(expiryTime);
     }
 
-    public ResponseEntity<UserResponse> resetPassword(String token, String newPassword, String confirmPassword) {
+    public ResponseEntity<?> resetPassword(String token, String newPassword, String confirmPassword) {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         User user = getByResetPasswordToken(token);
 
@@ -94,25 +94,14 @@ public class ForgotPasswordService {
                 user.setResetPasswordToken(null);
                 user.setResetPasswordTokenExpiry(null);
                 userRepository.save(user);
-                return ResponseEntity.ok(UserResponse.builder()
-                        .email(user.getEmail())
-                        .firstName(user.getFirstName())
-                        .lastName(user.getLastName())
-                        .message("Password successfully changed")
-                        .build());
+                return GlobalResponse.responseHandler("Password successfully changed", HttpStatus.OK, UserResponse.builder().email(user.getEmail()).firstName(user.getFirstName()).lastName(user.getLastName()).build());
             } else {
-                return ResponseEntity
-                        .status(HttpStatus.BAD_REQUEST)
-                        .body(UserResponse.builder().message("Token Expired").build());
+                return GlobalResponse.responseHandler("Token Expired",HttpStatus.BAD_REQUEST,UserResponse.builder().build());
             }
         } else if (!(newPassword.equals(confirmPassword))) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(UserResponse.builder().message("Passwords do not match!").build());
+            return GlobalResponse.responseHandler("Passwords do not match!" ,HttpStatus.BAD_REQUEST,UserResponse.builder().build());
         } else {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(UserResponse.builder().message("Invalid token").build());
+            return GlobalResponse.responseHandler("Invalid token" ,HttpStatus.BAD_REQUEST,UserResponse.builder().build());
         }
     }
 }

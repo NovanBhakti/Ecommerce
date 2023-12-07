@@ -26,22 +26,22 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/home")
-    public ResponseEntity<UserResponse> homePage(Authentication authentication) {
+    public ResponseEntity<?> homePage(Authentication authentication) {
         return userService.userWelcome(authentication);
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<ProfileResponse> showUserProfile(Authentication authentication) {
+    public ResponseEntity<?> showUserProfile(Authentication authentication) {
         return userService.showProfile(authentication);
     }
 
     @PutMapping("/profile/edit")
-    public ResponseEntity<ProfileResponse> editProfile(@RequestBody EditProfileRequest editProfileRequest, Authentication authentication) {
+    public ResponseEntity<?> editProfile(@RequestBody EditProfileRequest editProfileRequest, Authentication authentication) {
         return userService.editProfile(editProfileRequest, authentication);
     }
 
     @PostMapping("/profile/edit/change-password")
-    public ResponseEntity<UserResponse> changePassword(@RequestBody ChangePasswordRequest passwordRequest,
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest passwordRequest,
                                                        Authentication authentication) {
         return userService.changePassword(passwordRequest, authentication);
     }

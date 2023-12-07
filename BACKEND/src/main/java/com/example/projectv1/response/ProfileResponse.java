@@ -20,5 +20,4 @@ public class ProfileResponse {
     private String city;
     private String address;
     private String gender;
-    private String message;
 }

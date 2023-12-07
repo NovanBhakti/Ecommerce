@@ -2,6 +2,7 @@ package com.example.projectv1.controller;
 
 import com.example.projectv1.request.*;
 import com.example.projectv1.response.AuthenticationResponse;
+import com.example.projectv1.response.GlobalResponse;
 import com.example.projectv1.response.UserResponse;
 import com.example.projectv1.service.AuthenticationService;
 import com.example.projectv1.service.ForgotPasswordService;
@@ -21,25 +22,23 @@ public class ProjectController {
 
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(
+    public ResponseEntity<?> register(
             @RequestBody RegisterRequest registerRequest) {
         return authenticationService.register(registerRequest);
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<AuthenticationResponse> authenticate(
-            @RequestBody AuthenticationRequest authenticationRequest
-    ) {
+    public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest authenticationRequest) {
         return authenticationService.authenticate(authenticationRequest);
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<UserResponse> forgotPasswordMail(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {
+    public ResponseEntity<?> forgotPasswordMail(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {
         return forgotPasswordService.forgotPassword(forgotPasswordRequest);
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<UserResponse> resetPassword(@RequestParam String token, @RequestBody ResetPasswordRequest resetPasswordRequest) {
+    public ResponseEntity<?> resetPassword(@RequestParam String token, @RequestBody ResetPasswordRequest resetPasswordRequest) {
         String newPassword = resetPasswordRequest.getNewPassword();
         String confirmPassword = resetPasswordRequest.getConfirmPassword();
         return forgotPasswordService.resetPassword(token, newPassword, confirmPassword);
