@@ -14,5 +14,4 @@ import java.util.UUID;
 @NoArgsConstructor
 public class ProfileImageResponse {
     private UUID file;
-    private String message;
 }

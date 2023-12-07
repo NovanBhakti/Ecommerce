@@ -1,6 +1,7 @@
 package com.example.projectv1.service;
 
 import com.example.projectv1.entity.ProfilePicture;
+import com.example.projectv1.response.GlobalResponse;
 import com.example.projectv1.utils.ImageUtils;
 import com.example.projectv1.entity.User;
 import com.example.projectv1.entity.UserRepository;
@@ -31,67 +32,66 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public ResponseEntity<UserResponse> userWelcome(Authentication authentication) {
+    public ResponseEntity<?> userWelcome(Authentication authentication) {
         try {
             User user = getUserByAuth(authentication);
-            UserResponse userResponse = UserResponse.builder()
-                    .firstName(user.getFirstName())
-                    .lastName(user.getLastName())
-                    .email(user.getEmail())
-                    .message("User authenticated")
-                    .build();
-            return ResponseEntity.ok(userResponse);
+            return GlobalResponse
+                    .responseHandler("User Authenticated",
+                            HttpStatus.OK,
+                            UserResponse
+                                    .builder()
+                                    .firstName(user.getFirstName())
+                                    .lastName(user.getLastName())
+                                    .email(user.getEmail())
+                                    .build());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new UserResponse(null, null, null, "Bad Token"));
+            return GlobalResponse.responseHandler("Bad Token", HttpStatus.UNAUTHORIZED, UserResponse.builder().build());
         }
     }
 
-    public ResponseEntity<ProfileResponse> showProfile(Authentication authentication) {
+    public ResponseEntity<?> showProfile(Authentication authentication) {
         User user = getUserByAuth(authentication);
-        ProfileResponse profileResponse = ProfileResponse.builder()
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .dob(user.getDob())
-                .country(user.getCountry())
-                .state(user.getState())
-                .city(user.getCity())
-                .address(user.getAddress())
-                .gender(user.getGender())
-                .message("Successfully retrieving profile data")
-                .build();
-
-        return ResponseEntity.ok(profileResponse);
+        return GlobalResponse
+                .responseHandler("Successfully retrieving profile data", HttpStatus.OK, ProfileResponse.builder()
+                        .firstName(user.getFirstName())
+                        .lastName(user.getLastName())
+                        .dob(user.getDob())
+                        .country(user.getCountry())
+                        .state(user.getState())
+                        .city(user.getCity())
+                        .address(user.getAddress())
+                        .gender(user.getGender())
+                        .build());
     }
 
     public User getUserByAuth(Authentication authentication) {
-            String email = authentication.getName();
-            Optional<User> userOptional = userRepository.findByEmail(email);
+        String email = authentication.getName();
+        Optional<User> userOptional = userRepository.findByEmail(email);
 
-            return userOptional.orElseThrow(() -> new UsernameNotFoundException("User not found for email: " + email));
+        return userOptional.orElseThrow(() -> new UsernameNotFoundException("User not found for email: " + email));
     }
 
-    public ResponseEntity<UserResponse> changePassword(ChangePasswordRequest passwordRequest, Authentication authentication) {
+    public ResponseEntity<?> changePassword(ChangePasswordRequest passwordRequest, Authentication authentication) {
         User user = getUserByAuth(authentication);
 
         if (passwordEncoder.matches(passwordRequest.getCurrentPassword(), user.getPassword())) {
             String encodedPassword = passwordEncoder.encode(passwordRequest.getNewPassword());
             user.setPassword(encodedPassword);
             userRepository.save(user);
-
-            UserResponse userResponse = UserResponse.builder()
-                    .email(user.getEmail())
-                    .firstName(user.getFirstName())
-                    .lastName(user.getLastName())
-                    .message("Password change Successfully")
-                    .build();
-            return ResponseEntity.ok(userResponse);
+            return GlobalResponse
+                    .responseHandler("Password change Successfully", HttpStatus.OK, UserResponse.builder()
+                            .email(user.getEmail())
+                            .firstName(user.getFirstName())
+                            .lastName(user.getLastName())
+                            .build());
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(UserResponse.builder().message("Password doesn't match!").build());
+            return GlobalResponse
+                    .responseHandler("Password doesn't match!", HttpStatus.BAD_REQUEST, UserResponse.builder()
+                            .build());
         }
     }
 
-    public ResponseEntity<ProfileResponse> editProfile(EditProfileRequest editProfileRequest, Authentication authentication) {
+    public ResponseEntity<?> editProfile(EditProfileRequest editProfileRequest, Authentication authentication) {
         StringBuilder updatedFields = new StringBuilder("Updated fields: ");
         User user = getUserByAuth(authentication);
 
@@ -136,46 +136,45 @@ public class UserService {
             responseMessage = "No fields were updated";
         }
 
-        ProfileResponse profileResponse = ProfileResponse.builder()
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .dob(user.getDob())
-                .country(user.getCountry())
-                .state(user.getState())
-                .city(user.getCity())
-                .address(user.getAddress())
-                .gender(user.getGender())
-                .message(responseMessage)
-                .build();
-
-        return ResponseEntity.ok(profileResponse);
+        return GlobalResponse
+                .responseHandler(responseMessage, HttpStatus.OK, ProfileResponse.builder()
+                        .firstName(user.getFirstName())
+                        .lastName(user.getLastName())
+                        .dob(user.getDob())
+                        .country(user.getCountry())
+                        .state(user.getState())
+                        .city(user.getCity())
+                        .address(user.getAddress())
+                        .gender(user.getGender())
+                        .build());
     }
 
     public ResponseEntity<?> uploadImage(MultipartFile file, Authentication authentication) throws IOException {
         try {
             User user = getUserByAuth(authentication);
-            if (file.isEmpty()){
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(ProfileImageResponse.builder()
-                                .message("The file is empty")
-                                .build());
-            }
-            else if (!ImageUtils.isImage(file)) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(ProfileImageResponse.builder()
-                                .message("Wrong file extension! Only upload PNG, JPG, and JPEG file extensions")
-                                .build());
+            if (file.isEmpty()) {
+                return GlobalResponse
+                        .responseHandler("The file is empty", HttpStatus.BAD_REQUEST,
+                                ProfileImageResponse
+                                        .builder()
+                                        .build());
+            } else if (!ImageUtils.isImage(file)) {
+                return GlobalResponse
+                        .responseHandler("Wrong file extension! Only upload PNG, JPG, and JPEG file extensions",
+                                HttpStatus.BAD_REQUEST,
+                                ProfileImageResponse
+                                        .builder()
+                                        .build());
             } else {
                 ProfilePicture profilePicture = new ProfilePicture();
                 profilePicture.setProfilePicture(ImageUtils.imageCompressor(file.getBytes()));
                 profilePicture.setUser(user);
                 user.setProfilePicture(profilePicture);
                 userRepository.save(user);
-                return ResponseEntity.ok(ProfileImageResponse.builder().file(profilePicture.getId()).message("Image stored").build());
+                return GlobalResponse.responseHandler("Image stored", HttpStatus.OK, ProfileImageResponse.builder().file(profilePicture.getId()).build());
             }
         } catch (UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ProfileImageResponse.builder().message(e.getMessage()).build());
+            return GlobalResponse.responseHandler(e.getMessage(),HttpStatus.UNAUTHORIZED,ProfileImageResponse.builder().build());
         }
     }
 
@@ -186,9 +185,9 @@ public class UserService {
             byte[] images = ImageUtils.imageDecompressor(profilePicture.getProfilePicture());
             return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.valueOf("image/png")).body(images);
         } catch (NullPointerException e) {
-            return ResponseEntity.status(HttpStatus.OK).body(ProfileImageResponse.builder().message("Profile picture is empty").build());
+            return GlobalResponse.responseHandler("Profile picture is empty", HttpStatus.OK, null);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ProfileImageResponse.builder().message(e.getMessage()).build());
+            return GlobalResponse.responseHandler(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, null);
         }
     }
 }
