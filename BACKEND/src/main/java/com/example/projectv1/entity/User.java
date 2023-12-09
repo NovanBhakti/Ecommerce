@@ -24,11 +24,11 @@ import java.util.List;
 public class User implements UserDetails {
 
     @OneToOne(mappedBy = "user", cascade = {CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
-    @JoinColumn(name = "profile_picture_id") // Name of the foreign key column
+    @JoinColumn(name = "profile_picture_id")
     private ProfilePicture profilePicture;
 
     @Id
-    @GeneratedValue //it will set the strategy to AUTO
+    @GeneratedValue
     private Integer id;
 
     @Getter

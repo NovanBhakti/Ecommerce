@@ -35,7 +35,7 @@ public class UserController {
         return userService.showProfile(authentication);
     }
 
-    @PutMapping("/profile/edit")
+    @PutMapping("/profile")
     public ResponseEntity<?> editProfile(@RequestBody EditProfileRequest editProfileRequest, Authentication authentication) {
         return userService.editProfile(editProfileRequest, authentication);
     }
@@ -46,7 +46,7 @@ public class UserController {
         return userService.changePassword(passwordRequest, authentication);
     }
 
-    @PostMapping(value = "/edit/profile-image/upload")
+    @PostMapping ("/edit/profile-image/upload")
     public ResponseEntity<?> uploadImage(@RequestParam("image") MultipartFile file, Authentication authentication) throws IOException {
         return userService.uploadImage(file, authentication);
     }

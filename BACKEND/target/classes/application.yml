@@ -1,14 +1,14 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/projectv1
-#    username: ismannr
-#    password: Ismanganteng1
-    username: postgres
-    password: novan123
+    username: ismannr
+    password: Ismanganteng1
+#    username: postgres
+#    password: novan123
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update #everytime the apps started it will create schema and drop when the app closed
+      ddl-auto: create-drop #everytime the apps started it will create schema and drop when the app closed
     show-sql: true #everytime query is perform it will show the query
     properties:
       hibernate:

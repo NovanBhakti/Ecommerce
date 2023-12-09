@@ -166,15 +166,23 @@ public class UserService {
                                         .builder()
                                         .build());
             } else {
-                ProfilePicture profilePicture = new ProfilePicture();
-                profilePicture.setProfilePicture(ImageUtils.imageCompressor(file.getBytes()));
-                profilePicture.setUser(user);
-                user.setProfilePicture(profilePicture);
-                userRepository.save(user);
-                return GlobalResponse.responseHandler("Image stored", HttpStatus.OK, ProfileImageResponse.builder().file(profilePicture.getId()).build());
+                if (user.getProfilePicture() != null) {
+                    ProfilePicture profilePicture = user.getProfilePicture();
+                    profilePicture.setProfilePicture(ImageUtils.imageCompressor(file.getBytes()));
+                    userRepository.save(user);
+                    return GlobalResponse.responseHandler("Image updated", HttpStatus.OK, ProfileImageResponse.builder().file(profilePicture.getId()).build());
+                }
+                else {
+                    ProfilePicture profilePicture = new ProfilePicture();
+                    profilePicture.setProfilePicture(ImageUtils.imageCompressor(file.getBytes()));
+                    profilePicture.setUser(user);
+                    user.setProfilePicture(profilePicture);
+                    userRepository.save(user);
+                    return GlobalResponse.responseHandler("Image uploaded", HttpStatus.OK, ProfileImageResponse.builder().file(profilePicture.getId()).build());
+                }
             }
         } catch (UsernameNotFoundException e) {
-            return GlobalResponse.responseHandler(e.getMessage(),HttpStatus.UNAUTHORIZED,ProfileImageResponse.builder().build());
+            return GlobalResponse.responseHandler(e.getMessage(), HttpStatus.UNAUTHORIZED, ProfileImageResponse.builder().build());
         }
     }
 
