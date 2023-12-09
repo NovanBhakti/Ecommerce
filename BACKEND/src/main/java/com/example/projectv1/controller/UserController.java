@@ -47,5 +47,10 @@ public class UserController {
     public ResponseEntity<?> profileImage(Authentication authentication) {
         return userService.showImage(authentication);
     }
+
+    @DeleteMapping("/edit/profile-image")
+    public ResponseEntity<?> deleteProfileImage(Authentication authentication){
+        return userService.deleteImage(authentication);
+    }
 }
 

@@ -17,5 +17,5 @@ public interface UserService {
     ResponseEntity<?> editProfile(EditProfileRequest editProfileRequest, Authentication authentication);
     ResponseEntity<?> uploadImage(MultipartFile file, Authentication authentication) throws IOException;
     ResponseEntity<?> showImage(Authentication authentication);
-
+    ResponseEntity<?> deleteImage(Authentication authentication);
 }

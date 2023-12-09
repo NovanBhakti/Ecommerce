@@ -12,7 +12,7 @@ import java.time.format.DateTimeParseException;
 public class EditProfileRequest {
     private String firstName;
     private String lastName;
-    private LocalDate dob;
+    private String dobString;
     private String country;
     private String state;
     private String city;

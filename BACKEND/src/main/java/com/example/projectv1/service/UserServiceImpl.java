@@ -1,5 +1,6 @@
 package com.example.projectv1.service;
 
+import com.example.projectv1.entity.ProfilePictureRepository;
 import com.example.projectv1.entity.ProfilePicture;
 import com.example.projectv1.response.GlobalResponse;
 import com.example.projectv1.utils.ImageUtils;
@@ -23,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.Optional;
 
 @Service
@@ -31,7 +33,8 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
+    private final ProfilePictureRepository profilePictureRepository;
+    @Override
     public ResponseEntity<?> userWelcome(Authentication authentication) {
         try {
             User user = getUserByAuth(authentication);
@@ -48,7 +51,7 @@ public class UserServiceImpl implements UserService {
             return GlobalResponse.responseHandler("Bad Token", HttpStatus.UNAUTHORIZED, UserResponse.builder().build());
         }
     }
-
+    @Override
     public ResponseEntity<?> showProfile(Authentication authentication) {
         User user = getUserByAuth(authentication);
         return GlobalResponse
@@ -63,14 +66,14 @@ public class UserServiceImpl implements UserService {
                         .gender(user.getGender())
                         .build());
     }
-
+    @Override
     public User getUserByAuth(Authentication authentication) {
         String email = authentication.getName();
         Optional<User> userOptional = userRepository.findByEmail(email);
 
         return userOptional.orElseThrow(() -> new UsernameNotFoundException("User not found for email: " + email));
     }
-
+    @Override
     public ResponseEntity<?> changePassword(ChangePasswordRequest passwordRequest, Authentication authentication) {
         User user = getUserByAuth(authentication);
 
@@ -90,11 +93,16 @@ public class UserServiceImpl implements UserService {
                             .build());
         }
     }
-
+    @Override
     public ResponseEntity<?> editProfile(EditProfileRequest editProfileRequest, Authentication authentication) {
         StringBuilder updatedFields = new StringBuilder("Updated fields: ");
         User user = getUserByAuth(authentication);
-
+        LocalDate dob = null;
+        try {
+          dob = LocalDate.parse(editProfileRequest.getDobString());
+        } catch (DateTimeParseException e){
+            GlobalResponse.responseHandler(e.getMessage(), HttpStatus.OK, null);
+        }
         if (!(editProfileRequest.getFirstName().isBlank()) && !(editProfileRequest.getFirstName().equals(user.getFirstName()))) {
             user.setFirstName(editProfileRequest.getFirstName());
             updatedFields.append("firstName, ");
@@ -103,9 +111,14 @@ public class UserServiceImpl implements UserService {
             user.setLastName(editProfileRequest.getLastName());
             updatedFields.append("lastName, ");
         }
-        if (editProfileRequest.getDob() != null && !(editProfileRequest.getDob().equals(user.getDob())) && editProfileRequest.getDob().isBefore(LocalDate.now().minusYears(17))) {
-            user.setDob(editProfileRequest.getDob());
-            updatedFields.append("dob, ");
+        if (dob != null && !(dob.equals(user.getDob()))) {
+            if(dob.isBefore(LocalDate.now().minusYears(17))){
+                user.setDob(dob);
+                updatedFields.append("dob, ");
+            }
+            else {
+                updatedFields.append("dob user is under age, ");
+            }
         }
         if (!(editProfileRequest.getCountry().isEmpty()) && !(editProfileRequest.getCountry().equals(user.getCountry()))) {
             user.setCountry(editProfileRequest.getCountry());
@@ -148,7 +161,7 @@ public class UserServiceImpl implements UserService {
                         .gender(user.getGender())
                         .build());
     }
-
+    @Override
     public ResponseEntity<?> uploadImage(MultipartFile file, Authentication authentication) throws IOException {
         try {
             User user = getUserByAuth(authentication);
@@ -185,7 +198,7 @@ public class UserServiceImpl implements UserService {
             return GlobalResponse.responseHandler(e.getMessage(), HttpStatus.UNAUTHORIZED, ProfileImageResponse.builder().build());
         }
     }
-
+    @Override
     public ResponseEntity<?> showImage(Authentication authentication) {
         try {
             User user = getUserByAuth(authentication);
@@ -196,6 +209,21 @@ public class UserServiceImpl implements UserService {
             return GlobalResponse.responseHandler("Profile picture is empty", HttpStatus.OK, null);
         } catch (Exception e) {
             return GlobalResponse.responseHandler(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, null);
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> deleteImage(Authentication authentication) {
+        User user = getUserByAuth(authentication);
+        if (user.getProfilePicture() != null) {
+            ProfilePicture profilePicture = user.getProfilePicture();
+            profilePictureRepository.delete(profilePicture);
+            user.setProfilePicture(null);
+            userRepository.save(user);
+            return GlobalResponse.responseHandler("Image deleted", HttpStatus.OK, ProfileImageResponse.builder().build());
+        }
+        else {
+            return GlobalResponse.responseHandler("There's no image", HttpStatus.OK, ProfileImageResponse.builder().build());
         }
     }
 }
