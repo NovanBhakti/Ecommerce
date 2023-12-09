@@ -1,15 +1,10 @@
 package com.example.projectv1.controller;
 
 import com.example.projectv1.request.*;
-import com.example.projectv1.response.AuthenticationResponse;
-import com.example.projectv1.response.GlobalResponse;
-import com.example.projectv1.response.UserResponse;
 import com.example.projectv1.service.AuthenticationService;
 import com.example.projectv1.service.ForgotPasswordService;
-import com.example.projectv1.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
