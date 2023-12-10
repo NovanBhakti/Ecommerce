@@ -98,6 +98,7 @@ public class UserServiceImpl implements UserService {
         StringBuilder updatedFields = new StringBuilder("Updated fields: ");
         User user = getUserByAuth(authentication);
         LocalDate dob = null;
+        Integer age = null;
         try {
           dob = LocalDate.parse(editProfileRequest.getDobString());
         } catch (DateTimeParseException e){
@@ -114,6 +115,7 @@ public class UserServiceImpl implements UserService {
         if (dob != null && !(dob.equals(user.getDob()))) {
             if(dob.isBefore(LocalDate.now().minusYears(17))){
                 user.setDob(dob);
+                age = LocalDate.now().getYear() - dob.getYear();
                 updatedFields.append("dob, ");
             }
             else {
@@ -159,6 +161,7 @@ public class UserServiceImpl implements UserService {
                         .city(user.getCity())
                         .address(user.getAddress())
                         .gender(user.getGender())
+                        .age(age)
                         .build());
     }
     @Override
