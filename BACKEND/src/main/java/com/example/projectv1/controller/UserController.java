@@ -2,6 +2,9 @@ package com.example.projectv1.controller;
 
 import com.example.projectv1.request.ChangePasswordRequest;
 import com.example.projectv1.request.EditProfileRequest;
+import com.example.projectv1.request.ForgotPasswordRequest;
+import com.example.projectv1.request.ResetPasswordRequest;
+import com.example.projectv1.service.AuthenticationService;
 import com.example.projectv1.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +20,7 @@ import java.io.IOException;
 @CrossOrigin(origins = "http://localhost:3000")
 public class UserController {
     private final UserService userService;
+    private final AuthenticationService authenticationService;
 
     @GetMapping("/home")
     public ResponseEntity<?> homePage(Authentication authentication) {
@@ -52,6 +56,16 @@ public class UserController {
     @DeleteMapping("/edit/profile-image")
     public ResponseEntity<?> deleteProfileImage(Authentication authentication){
         return userService.deleteImage(authentication);
+    }
+
+    @PostMapping("/email-verification")
+    public ResponseEntity<?> verifyAccount(Authentication authentication) {
+        return authenticationService.emailVerification(authentication);
+    }
+
+    @GetMapping("/account-verified")
+    public ResponseEntity<?> resetPassword(@RequestParam String token) {
+        return authenticationService.verifyingEmail(token);
     }
 }
 

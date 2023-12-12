@@ -2,16 +2,11 @@ package com.example.projectv1.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.JdbcType;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.Type;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.sql.Types;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -26,6 +21,14 @@ public class User implements UserDetails {
     @OneToOne(mappedBy = "user", cascade = {CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
     @JoinColumn(name = "profile_picture_id")
     private ProfilePicture profilePicture;
+
+    @OneToOne(mappedBy = "user", cascade = {CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
+    @JoinColumn(name = "forgot_password_id")
+    private ForgotPassword forgotPassword;
+
+    @OneToOne(mappedBy = "user", cascade = {CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
+    @JoinColumn(name = "email_verification_id")
+    private EmailVerification emailVerification;
 
     @Id
     @GeneratedValue
@@ -51,10 +54,6 @@ public class User implements UserDetails {
     private String email;
 
     private String password;
-
-    private String resetPasswordToken;
-
-    private LocalDateTime resetPasswordTokenExpiry;
 
 //    after implementing UserDetails, add role => class type = ENUM, also add the annotation
     @Enumerated(EnumType.ORDINAL) //let JPA return value

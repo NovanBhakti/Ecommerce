@@ -4,8 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
+import java.util.Base64;
 
 @Data
 @Builder
@@ -20,5 +22,6 @@ public class ProfileResponse {
     private String city;
     private String address;
     private String gender;
+    private String profilePicture;
     private Integer age;
 }

@@ -3,6 +3,7 @@ package com.example.projectv1.utils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Base64;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
@@ -39,6 +40,16 @@ public class ImageUtils {
             outputStream.close();
         }catch (Exception ignored){}
         return outputStream.toByteArray();
+    }
+
+    public static String convertToBase64(byte[] data) {
+        data = imageCompressor(data);
+        return Base64.getEncoder().encodeToString(data);
+    }
+
+    public static byte[] convertFromBase64(String base64String) {
+        byte[] decodedImage = Base64.getDecoder().decode(base64String);
+        return imageDecompressor(decodedImage);
     }
 
     public static Boolean isImage(MultipartFile file){

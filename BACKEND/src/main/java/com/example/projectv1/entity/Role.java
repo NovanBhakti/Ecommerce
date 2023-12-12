@@ -11,7 +11,7 @@ package com.example.projectv1.entity;
 //  Implementation
 //  Level myVar = Level.MEDIUM;
 public enum Role {
-
+    NOT_VERIFIED,
     USER,
     ADMIN
 }

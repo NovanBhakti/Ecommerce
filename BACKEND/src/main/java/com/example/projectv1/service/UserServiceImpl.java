@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.Base64;
 import java.util.Optional;
 
 @Service
@@ -64,6 +65,7 @@ public class UserServiceImpl implements UserService {
                         .city(user.getCity())
                         .address(user.getAddress())
                         .gender(user.getGender())
+                        .profilePicture(ImageUtils.convertToBase64(user.getProfilePicture().getProfilePicture()))
                         .build());
     }
     @Override
