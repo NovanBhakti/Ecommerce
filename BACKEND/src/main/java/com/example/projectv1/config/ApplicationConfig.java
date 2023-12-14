@@ -1,6 +1,6 @@
 package com.example.projectv1.config;
 
-import com.example.projectv1.entity.UserRepository;
+import com.example.projectv1.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

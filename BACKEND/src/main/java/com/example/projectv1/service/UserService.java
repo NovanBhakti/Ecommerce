@@ -12,10 +12,9 @@ import java.io.IOException;
 public interface UserService {
     ResponseEntity<?> userWelcome(Authentication authentication);
     ResponseEntity<?> showProfile(Authentication authentication);
-    User getUserByAuth(Authentication authentication);
     ResponseEntity<?> changePassword(ChangePasswordRequest passwordRequest, Authentication authentication);
     ResponseEntity<?> editProfile(EditProfileRequest editProfileRequest, Authentication authentication);
-    ResponseEntity<?> uploadImage(MultipartFile file, Authentication authentication) throws IOException;
-    ResponseEntity<?> showImage(Authentication authentication);
-    ResponseEntity<?> deleteImage(Authentication authentication);
+    ResponseEntity<?> uploadProfilePicture(MultipartFile file, Authentication authentication) throws IOException;
+    ResponseEntity<?> showProfilePicture(Authentication authentication);
+    ResponseEntity<?> deleteProfilePicture(Authentication authentication);
 }

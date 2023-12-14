@@ -1,11 +1,11 @@
 package com.example.projectv1.service;
 
-import com.example.projectv1.entity.ProfilePictureRepository;
+import com.example.projectv1.repository.ProfilePictureRepository;
 import com.example.projectv1.entity.ProfilePicture;
 import com.example.projectv1.response.GlobalResponse;
 import com.example.projectv1.utils.ImageUtils;
 import com.example.projectv1.entity.User;
-import com.example.projectv1.entity.UserRepository;
+import com.example.projectv1.repository.UserRepository;
 import com.example.projectv1.request.ChangePasswordRequest;
 import com.example.projectv1.request.EditProfileRequest;
 import com.example.projectv1.response.ProfileImageResponse;
@@ -25,7 +25,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.util.Base64;
 import java.util.Optional;
 
 @Service
@@ -34,7 +33,7 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final ProfilePictureRepository profilePictureRepository;
+    private final ImageHandlerService imageHandlerService;
     @Override
     public ResponseEntity<?> userWelcome(Authentication authentication) {
         try {
@@ -68,8 +67,7 @@ public class UserServiceImpl implements UserService {
                         .profilePicture(ImageUtils.convertToBase64(user.getProfilePicture().getProfilePicture()))
                         .build());
     }
-    @Override
-    public User getUserByAuth(Authentication authentication) {
+    private User getUserByAuth(Authentication authentication) {
         String email = authentication.getName();
         Optional<User> userOptional = userRepository.findByEmail(email);
 
@@ -166,69 +164,19 @@ public class UserServiceImpl implements UserService {
                         .age(age)
                         .build());
     }
+
     @Override
-    public ResponseEntity<?> uploadImage(MultipartFile file, Authentication authentication) throws IOException {
-        try {
-            User user = getUserByAuth(authentication);
-            if (file.isEmpty()) {
-                return GlobalResponse
-                        .responseHandler("The file is empty", HttpStatus.BAD_REQUEST,
-                                ProfileImageResponse
-                                        .builder()
-                                        .build());
-            } else if (!ImageUtils.isImage(file)) {
-                return GlobalResponse
-                        .responseHandler("Wrong file extension! Only upload PNG, JPG, and JPEG file extensions",
-                                HttpStatus.BAD_REQUEST,
-                                ProfileImageResponse
-                                        .builder()
-                                        .build());
-            } else {
-                if (user.getProfilePicture() != null) {
-                    ProfilePicture profilePicture = user.getProfilePicture();
-                    profilePicture.setProfilePicture(ImageUtils.imageCompressor(file.getBytes()));
-                    userRepository.save(user);
-                    return GlobalResponse.responseHandler("Image updated", HttpStatus.OK, ProfileImageResponse.builder().file(profilePicture.getId()).build());
-                }
-                else {
-                    ProfilePicture profilePicture = new ProfilePicture();
-                    profilePicture.setProfilePicture(ImageUtils.imageCompressor(file.getBytes()));
-                    profilePicture.setUser(user);
-                    user.setProfilePicture(profilePicture);
-                    userRepository.save(user);
-                    return GlobalResponse.responseHandler("Image uploaded", HttpStatus.OK, ProfileImageResponse.builder().file(profilePicture.getId()).build());
-                }
-            }
-        } catch (UsernameNotFoundException e) {
-            return GlobalResponse.responseHandler(e.getMessage(), HttpStatus.UNAUTHORIZED, ProfileImageResponse.builder().build());
-        }
-    }
-    @Override
-    public ResponseEntity<?> showImage(Authentication authentication) {
-        try {
-            User user = getUserByAuth(authentication);
-            ProfilePicture profilePicture = user.getProfilePicture();
-            byte[] images = ImageUtils.imageDecompressor(profilePicture.getProfilePicture());
-            return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.valueOf("image/png")).body(images);
-        } catch (NullPointerException e) {
-            return GlobalResponse.responseHandler("Profile picture is empty", HttpStatus.OK, null);
-        } catch (Exception e) {
-            return GlobalResponse.responseHandler(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, null);
-        }
+    public ResponseEntity<?> uploadProfilePicture(MultipartFile file, Authentication authentication) throws IOException {
+        return imageHandlerService.uploadImage(file, getUserByAuth(authentication));
     }
 
     @Override
-    public ResponseEntity<?> deleteImage(Authentication authentication) {
-        User user = getUserByAuth(authentication);
-        if (user.getProfilePicture() != null) {
-            ProfilePicture profilePicture = user.getProfilePicture();
-            profilePictureRepository.delete(profilePicture);
-            user.setProfilePicture(null);
-            userRepository.save(user);
-            return GlobalResponse.responseHandler("Image deleted", HttpStatus.OK, ProfileImageResponse.builder().build());
-        }
-        else {
-            return GlobalResponse.responseHandler("There's no image", HttpStatus.OK, ProfileImageResponse.builder().build());
-        }
+    public ResponseEntity<?> showProfilePicture(Authentication authentication) {
+        return imageHandlerService.showImage(getUserByAuth(authentication));
+    }
+
+    @Override
+    public ResponseEntity<?> deleteProfilePicture(Authentication authentication) {
+        return imageHandlerService.deleteImage(getUserByAuth(authentication));
     }
 }

@@ -24,7 +24,7 @@ public class User implements UserDetails {
 
     @OneToOne(mappedBy = "user", cascade = {CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
     @JoinColumn(name = "forgot_password_id")
-    private ForgotPassword forgotPassword;
+    private ResetPassword resetPassword;
 
     @OneToOne(mappedBy = "user", cascade = {CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
     @JoinColumn(name = "email_verification_id")

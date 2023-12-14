@@ -1,9 +1,9 @@
 package com.example.projectv1.service;
 
-import com.example.projectv1.entity.ForgotPassword;
-import com.example.projectv1.entity.ResetPasswordRepository;
+import com.example.projectv1.entity.ResetPassword;
+import com.example.projectv1.repository.ResetPasswordRepository;
 import com.example.projectv1.entity.User;
-import com.example.projectv1.entity.UserRepository;
+import com.example.projectv1.repository.UserRepository;
 import com.example.projectv1.request.ForgotPasswordRequest;
 import com.example.projectv1.response.GlobalResponse;
 import lombok.RequiredArgsConstructor;
@@ -32,30 +32,30 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
         String resetToken = RandomString.make(30);
         String resetLink = "http://localhost:3000/reset-password?token=" + resetToken;
         String emailBody = "Click the link below to reset your password:\n" + resetLink;
-        ForgotPassword forgotPassword;
+        ResetPassword resetPassword;
 
         try {
             User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found!"));
-            if (user.getForgotPassword() != null && isResetTokenValid(user.getForgotPassword().getResetPasswordTokenExpiry())) {
+            if (user.getResetPassword() != null && isResetTokenValid(user.getResetPassword().getResetPasswordTokenExpiry())) {
                 return GlobalResponse.responseHandler("Duplicate reset password request!", HttpStatus.BAD_REQUEST, null);
-            } else if (user.getForgotPassword() != null && !isResetTokenValid(user.getForgotPassword().getResetPasswordTokenExpiry())){
+            } else if (user.getResetPassword() != null && !isResetTokenValid(user.getResetPassword().getResetPasswordTokenExpiry())){
                 LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(1);
-                forgotPassword = user.getForgotPassword();
-                forgotPassword.setUser(user);
-                forgotPassword.setResetPasswordToken(resetToken);
-                forgotPassword.setResetPasswordTokenExpiry(expiryTime);
-                user.setForgotPassword(forgotPassword);
+                resetPassword = user.getResetPassword();
+                resetPassword.setUser(user);
+                resetPassword.setResetPasswordToken(resetToken);
+                resetPassword.setResetPasswordTokenExpiry(expiryTime);
+                user.setResetPassword(resetPassword);
                 emailSenderService.sendEmail(email, "Password Reset", emailBody);
                 userRepository.save(user);
 
                 return GlobalResponse.responseHandler("reset password request has resent", HttpStatus.OK, null);
             } else {
-                forgotPassword = new ForgotPassword();
+                resetPassword = new ResetPassword();
                 LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(1);
-                forgotPassword.setUser(user);
-                forgotPassword.setResetPasswordToken(resetToken);
-                forgotPassword.setResetPasswordTokenExpiry(expiryTime);
-                user.setForgotPassword(forgotPassword);
+                resetPassword.setUser(user);
+                resetPassword.setResetPasswordToken(resetToken);
+                resetPassword.setResetPasswordTokenExpiry(expiryTime);
+                user.setResetPassword(resetPassword);
                 userRepository.save(user);
                 emailSenderService.sendEmail(email, "Password Reset", emailBody);
                 return GlobalResponse.responseHandler("Email Sent", HttpStatus.OK, null);
@@ -87,13 +87,13 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
             BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
             User user = getByResetPasswordToken(token);
             assert user != null;
-            ForgotPassword forgotPassword = user.getForgotPassword();
+            ResetPassword resetPassword = user.getResetPassword();
             if (newPassword.equals(confirmPassword)) {
-                if (isResetTokenValid(forgotPassword.getResetPasswordTokenExpiry())) {
+                if (isResetTokenValid(resetPassword.getResetPasswordTokenExpiry())) {
                     String encodedPassword = passwordEncoder.encode(newPassword);
                     user.setPassword(encodedPassword);
-                    resetPasswordRepository.delete(forgotPassword);
-                    user.setForgotPassword(null);
+                    resetPasswordRepository.delete(resetPassword);
+                    user.setResetPassword(null);
                     userRepository.save(user);
                     return GlobalResponse.responseHandler("Password successfully changed", HttpStatus.OK, null);
                 } else {

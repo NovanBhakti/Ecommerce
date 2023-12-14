@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor //the constructor
 @Entity
 @Table(name = "_user_forgot_password")
-public class ForgotPassword {
+public class ResetPassword {
     @Id
     @GeneratedValue
     private Long id;

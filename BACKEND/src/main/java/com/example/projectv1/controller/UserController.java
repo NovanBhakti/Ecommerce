@@ -45,17 +45,17 @@ public class UserController {
 
     @PostMapping ("/edit/profile-image")
     public ResponseEntity<?> uploadImage(@RequestParam("image") MultipartFile file, Authentication authentication) throws IOException {
-        return userService.uploadImage(file, authentication);
+        return userService.uploadProfilePicture(file, authentication);
     }
 
     @GetMapping("/edit/profile-image")
     public ResponseEntity<?> profileImage(Authentication authentication) {
-        return userService.showImage(authentication);
+        return userService.showProfilePicture(authentication);
     }
 
     @DeleteMapping("/edit/profile-image")
     public ResponseEntity<?> deleteProfileImage(Authentication authentication){
-        return userService.deleteImage(authentication);
+        return userService.deleteProfilePicture(authentication);
     }
 
     @PostMapping("/email-verification")

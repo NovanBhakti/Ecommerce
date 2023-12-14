@@ -1,6 +1,8 @@
 package com.example.projectv1.service;
 
 import com.example.projectv1.entity.*;
+import com.example.projectv1.repository.EmailVerificationRepository;
+import com.example.projectv1.repository.UserRepository;
 import com.example.projectv1.request.AuthenticationRequest;
 import com.example.projectv1.request.RegisterRequest;
 import com.example.projectv1.response.AuthenticationResponse;
@@ -149,7 +151,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             return GlobalResponse.responseHandler(message, HttpStatus.OK, object);
         } catch (AuthenticationException e) {
             // Handle authentication failure, e.g., invalid credentials
-            String errorMessage = "Authentication failed: " + e.getMessage();
+            String errorMessage = "Wrong email or password";
             object = AuthenticationResponse.builder().build();
             return GlobalResponse.responseHandler(errorMessage, HttpStatus.UNAUTHORIZED, object);
         }
