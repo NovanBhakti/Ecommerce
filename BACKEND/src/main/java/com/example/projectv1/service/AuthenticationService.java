@@ -8,6 +8,5 @@ import org.springframework.security.core.Authentication;
 public interface AuthenticationService {
     ResponseEntity<?> register(RegisterRequest registerRequest);
     ResponseEntity<?> authenticate(AuthenticationRequest authenticationRequest);
-    ResponseEntity<?> emailVerification(Authentication authentication);
     ResponseEntity<?> verifyingEmail(String token);
 }

@@ -1,5 +1,8 @@
 package com.example.projectv1.service;
 
+import com.example.projectv1.entity.EmailVerification;
+import com.example.projectv1.entity.Role;
+import com.example.projectv1.repository.EmailVerificationRepository;
 import com.example.projectv1.repository.ProfilePictureRepository;
 import com.example.projectv1.entity.ProfilePicture;
 import com.example.projectv1.response.GlobalResponse;
@@ -12,9 +15,11 @@ import com.example.projectv1.response.ProfileImageResponse;
 import com.example.projectv1.response.ProfileResponse;
 import com.example.projectv1.response.UserResponse;
 import lombok.RequiredArgsConstructor;
+import net.bytebuddy.utility.RandomString;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,8 +29,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Optional;
+
+import static com.example.projectv1.utils.TemporaryTokenUtil.isResetTokenValid;
 
 @Service
 @Transactional
@@ -34,6 +42,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final ImageHandlerService imageHandlerService;
+    private final EmailSenderService emailSenderService;
     @Override
     public ResponseEntity<?> userWelcome(Authentication authentication) {
         try {
@@ -51,21 +60,67 @@ public class UserServiceImpl implements UserService {
             return GlobalResponse.responseHandler("Bad Token", HttpStatus.UNAUTHORIZED, UserResponse.builder().build());
         }
     }
+
+    public ResponseEntity<?> emailVerification(Authentication authentication){
+        String email = authentication.getName();
+        String verifyToken = RandomString.make(30);
+        String verifyLink = "http://localhost:3000/email-verification?token=" + verifyToken;
+        String emailBody = "Click the link below to verify your account:\n" + verifyLink;
+        EmailVerification verification;
+
+        try {
+            User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found!"));
+            if (user.getEmailVerification() != null && isResetTokenValid(user.getEmailVerification().getEmailVerificationTokenExpiry())) {
+                return GlobalResponse.responseHandler("Duplicate email verification request!", HttpStatus.BAD_REQUEST, null);
+            } else if (user.getEmailVerification() != null && !isResetTokenValid(user.getEmailVerification().getEmailVerificationTokenExpiry())){
+                LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(1);
+                verification = user.getEmailVerification();
+                verification.setUser(user);
+                verification.setEmailVerificationToken(verifyToken);
+                verification.setEmailVerificationTokenExpiry(expiryTime);
+                user.setEmailVerification(verification);
+                emailSenderService.sendEmail(email, "Account Verification", emailBody);
+                userRepository.save(user);
+
+                return GlobalResponse.responseHandler("Verification link request has resent", HttpStatus.OK, null);
+            } else {
+                verification = new EmailVerification();
+                LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(1);
+                verification.setUser(user);
+                verification.setEmailVerificationToken(verifyToken);
+                verification.setEmailVerificationTokenExpiry(expiryTime);
+                user.setEmailVerification(verification);
+                userRepository.save(user);
+                emailSenderService.sendEmail(email, "Account Verification", emailBody);
+                return GlobalResponse.responseHandler("Verification link sent", HttpStatus.OK, null);
+            }
+        } catch (MailException e) {
+            return GlobalResponse.responseHandler("Failed to send mail.", HttpStatus.BAD_REQUEST, null);
+        } catch (UsernameNotFoundException e) {
+            return GlobalResponse.responseHandler(e.getMessage(), HttpStatus.BAD_REQUEST, null);
+        }
+    }
+
     @Override
     public ResponseEntity<?> showProfile(Authentication authentication) {
-        User user = getUserByAuth(authentication);
-        return GlobalResponse
-                .responseHandler("Successfully retrieving profile data", HttpStatus.OK, ProfileResponse.builder()
-                        .firstName(user.getFirstName())
-                        .lastName(user.getLastName())
-                        .dob(user.getDob())
-                        .country(user.getCountry())
-                        .state(user.getState())
-                        .city(user.getCity())
-                        .address(user.getAddress())
-                        .gender(user.getGender())
-                        .profilePicture(ImageUtils.convertToBase64(user.getProfilePicture().getProfilePicture()))
-                        .build());
+        try {
+            User user = getUserByAuth(authentication);
+            String base64Image = (String) imageHandlerService.rawImageBase64(user);
+            return GlobalResponse
+                    .responseHandler("Successfully retrieving profile data", HttpStatus.OK, ProfileResponse.builder()
+                            .firstName(user.getFirstName())
+                            .lastName(user.getLastName())
+                            .dob(user.getDob())
+                            .country(user.getCountry())
+                            .state(user.getState())
+                            .city(user.getCity())
+                            .address(user.getAddress())
+                            .gender(user.getGender())
+                            .profilePicture(base64Image)
+                            .build());
+        } catch (Exception e){
+            return GlobalResponse.responseHandler(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, null);
+        }
     }
     private User getUserByAuth(Authentication authentication) {
         String email = authentication.getName();

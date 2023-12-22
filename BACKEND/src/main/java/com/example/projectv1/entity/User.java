@@ -56,7 +56,7 @@ public class User implements UserDetails {
     private String password;
 
 //    after implementing UserDetails, add role => class type = ENUM, also add the annotation
-    @Enumerated(EnumType.ORDINAL) //let JPA return value
+    @Enumerated(EnumType.STRING) //let JPA return value
     private Role role;
 
     @Override

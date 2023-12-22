@@ -1,7 +1,9 @@
 package com.example.projectv1.service;
 
 import com.example.projectv1.entity.Product;
+import com.example.projectv1.entity.ProductPicture;
 import com.example.projectv1.handler.ProductIdNotFoundException;
+import com.example.projectv1.repository.ProductPictureRepository;
 import com.example.projectv1.repository.ProductRepository;
 import com.example.projectv1.request.ProductRequest;
 import com.example.projectv1.response.GlobalResponse;
@@ -14,21 +16,28 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.awt.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.List;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService{
     private final ProductRepository productRepository;
+    private final ProductPictureRepository productPictureRepository;
     private final ImageHandlerService imageHandlerService;
 
     private Product getProductById(UUID id){
         Optional<Product> productOptional = productRepository.findById(id);
         if (productOptional.isPresent()) {
-            return productOptional.get();
+            try {
+                return productOptional.get();
+            } catch (NullPointerException e){
+                return productOptional.get();
+            }
         } else {
             throw new ProductIdNotFoundException("Product with ID " + id + " not found");
         }
@@ -60,33 +69,49 @@ public class ProductServiceImpl implements ProductService{
                 .build();
 
         productRepository.save(product);
+
         return GlobalResponse.responseHandler("Successfully added product", HttpStatus.OK, product);
     }
 
     @Override
     public ResponseEntity<?> showProductDetails(UUID id) {
-        Product product = getProductById(id);
-        String productPicture = null;
         try {
-            productPicture = ImageUtils.convertToBase64(product.getProductPicture().getProductPicture());
-        } catch (NullPointerException e){}
-        return GlobalResponse
-                .responseHandler("Successfully retrieving product data", HttpStatus.OK, ProductResponse.builder()
-                        .id(product.getId())
-                        .name(product.getName())
-                        .description(product.getDescription())
-                        .price(product.getPrice())
-                        .quantity(product.getQuantity())
-                        .category(String.valueOf(product.getCategory()))
-                        .productPicture(productPicture)
-                        .build());
+            Product product = getProductById(id);
+            Object base64Image = imageHandlerService.rawImageBase64(product);
+            List<String> base64Images = new ArrayList<>();
+            if (base64Image instanceof String) {
+                base64Images.add((String) base64Image);
+            } else if (base64Image instanceof List) {
+                base64Images.addAll((List<String>) base64Image);
+            } else {
+                throw new UnsupportedOperationException("Unsupported base64Image type: " + base64Image.getClass().getSimpleName());
+            }
+            return GlobalResponse
+                    .responseHandler("Successfully retrieving product data", HttpStatus.OK, ProductResponse.builder()
+                            .id(product.getId())
+                            .name(product.getName())
+                            .description(product.getDescription())
+                            .price(product.getPrice())
+                            .quantity(product.getQuantity())
+                            .category(String.valueOf(product.getCategory()))
+                            .productPictures(base64Images)
+                            .build());
+        } catch (Exception e) {
+            return GlobalResponse.responseHandler(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, null);
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> showProductPicture(UUID id) {
+        Product product = getProductById(id);
+        return imageHandlerService.showImage(product);
     }
 
     @Override
     public ResponseEntity<?> uploadProductPicture(UUID id, MultipartFile file) throws IOException {
         try {
             return imageHandlerService.uploadImage(file, getProductById(id));
-        } catch (ProductIdNotFoundException e){
+        } catch (ProductIdNotFoundException | NullPointerException e){
             return GlobalResponse.responseHandler(e.getMessage(), HttpStatus.NOT_FOUND, null);
         }
     }
@@ -94,25 +119,26 @@ public class ProductServiceImpl implements ProductService{
     @Override
     public ResponseEntity<?> editProduct(UUID id, ProductRequest productRequest) {
         StringBuilder updatedFields = new StringBuilder("Updated fields: ");
+
         Product product = getProductById(id);
-        if (!(productRequest.getName().isBlank())){
+        if (!(productRequest.getName().isBlank()) && !productRequest.getName().equals(product.getName())){
             product.setName(productRequest.getName());
             updatedFields.append("name, ");
         }
-        if (productRequest.getDescription().equals(product.getDescription())
-                && productRequest.getDescription().length() < 20){
+        if (!productRequest.getDescription().equals(product.getDescription())
+                && productRequest.getDescription().length() >= 20){
             product.setDescription(productRequest.getDescription());
             updatedFields.append("description, ");
         }
-        if (productRequest.getQuantity() > 0){
-            product.setQuantity(productRequest.getQuantity());
+        if ((productRequest.getQuantity() + product.getQuantity()) >= 0) {
+            product.setQuantity(productRequest.getQuantity() + product.getQuantity());
             updatedFields.append("quantity, ");
         }
-        if (productRequest.getCategory() != null){
+        if (productRequest.getCategory() != null && !productRequest.getCategory().equals(product.getCategory())){
             product.setCategory(productRequest.getCategory());
             updatedFields.append("category, ");
         }
-        if (productRequest.getPrice() >= 0){
+        if (productRequest.getPrice() >= 0 && productRequest.getPrice() != product.getPrice()){
             product.setPrice(productRequest.getPrice());
             updatedFields.append("price, ");
         }
@@ -134,7 +160,6 @@ public class ProductServiceImpl implements ProductService{
                         .price(product.getPrice())
                         .quantity(product.getQuantity())
                         .category(String.valueOf(product.getCategory()))
-                        .productPicture(ImageUtils.convertToBase64(product.getProductPicture().getProductPicture()))
                         .build());
     }
 
@@ -142,4 +167,18 @@ public class ProductServiceImpl implements ProductService{
     public ResponseEntity<?> deleteProductPicture(UUID id) {
         return imageHandlerService.deleteImage(getProductById(id));
     }
+
+    @Override
+    public ResponseEntity<?> deleteProductByID(UUID id){
+        deleteProductPicture(id);
+        productRepository.deleteById(id);
+        return GlobalResponse.responseHandler("Product with id : " + id + " successfully deleted", HttpStatus.OK, null);
+    }
+
+    @Override
+    public ResponseEntity<?> showProductPictureById(UUID id) {
+        return imageHandlerService.showProductImageById(id);
+    }
+
+
 }

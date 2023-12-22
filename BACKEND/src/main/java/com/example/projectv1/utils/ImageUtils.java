@@ -43,13 +43,13 @@ public class ImageUtils {
     }
 
     public static String convertToBase64(byte[] data) {
-        data = imageCompressor(data);
+        data = imageDecompressor(data);
         return Base64.getEncoder().encodeToString(data);
     }
 
     public static byte[] convertFromBase64(String base64String) {
         byte[] decodedImage = Base64.getDecoder().decode(base64String);
-        return imageDecompressor(decodedImage);
+        return imageCompressor(decodedImage);
     }
 
     public static Boolean isImage(MultipartFile file){

@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 @Data   //it will generate setter, getter, to string
 @Builder    //build object
@@ -17,9 +19,8 @@ import java.util.UUID;
 @Table(name = "_product")
 public class Product {
 
-    @OneToOne(mappedBy = "product", cascade = {CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
-    @JoinColumn(name = "product_picture_id")
-    private ProductPicture productPicture;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductPicture> productPictures = new ArrayList<>();
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

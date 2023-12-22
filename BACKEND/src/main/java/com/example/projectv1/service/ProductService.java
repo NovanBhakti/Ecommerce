@@ -10,7 +10,10 @@ import java.util.UUID;
 public interface ProductService {
     ResponseEntity<?> addProduct(ProductRequest productRequest);
     ResponseEntity<?> showProductDetails(UUID id);
+    ResponseEntity<?> showProductPicture(UUID id);
     ResponseEntity<?> uploadProductPicture(UUID id, MultipartFile file) throws IOException;
     ResponseEntity<?> editProduct(UUID id, ProductRequest productRequest);
     ResponseEntity<?> deleteProductPicture(UUID id);
+    ResponseEntity<?> deleteProductByID(UUID id);
+    ResponseEntity<?> showProductPictureById(UUID id);
 }

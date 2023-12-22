@@ -12,9 +12,10 @@ import net.bytebuddy.utility.RandomString;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
+import org.springframework.mail.MailSendException;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -58,14 +59,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
 
         userRepository.save(user);
-//        var jwtToken = jwtServiceImpl.generateToken(user);
-        message = "Account Registered, please check your email to verify your account";
-        object = AuthenticationResponse.builder().token(null).build();
-        return GlobalResponse.responseHandler(message, HttpStatus.OK, object);
+        return emailVerificationOnRegister(registerRequest.getEmail());
     }
 
-    public ResponseEntity<?> emailVerification(Authentication authentication){
-        String email = authentication.getName();
+    private ResponseEntity<?> emailVerificationOnRegister(String email) {
         String verifyToken = RandomString.make(30);
         String verifyLink = "http://localhost:3000/email-verification?token=" + verifyToken;
         String emailBody = "Click the link below to verify your account:\n" + verifyLink;
@@ -73,62 +70,24 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         try {
             User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found!"));
-            if (user.getEmailVerification() != null && isResetTokenValid(user.getEmailVerification().getEmailVerificationTokenExpiry())) {
-                return GlobalResponse.responseHandler("Duplicate email verification request!", HttpStatus.BAD_REQUEST, null);
-            } else if (user.getEmailVerification() != null && !isResetTokenValid(user.getEmailVerification().getEmailVerificationTokenExpiry())){
-                LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(1);
-                verification = user.getEmailVerification();
-                verification.setUser(user);
-                verification.setEmailVerificationToken(verifyToken);
-                verification.setEmailVerificationTokenExpiry(expiryTime);
-                user.setEmailVerification(verification);
-                emailSenderService.sendEmail(email, "Account Verification", emailBody);
-                userRepository.save(user);
 
-                return GlobalResponse.responseHandler("Verification link request has resent", HttpStatus.OK, null);
-            } else {
-                verification = new EmailVerification();
-                LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(1);
-                verification.setUser(user);
-                verification.setEmailVerificationToken(verifyToken);
-                verification.setEmailVerificationTokenExpiry(expiryTime);
-                user.setEmailVerification(verification);
-                userRepository.save(user);
+            verification = new EmailVerification();
+            LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(1);
+            verification.setUser(user);
+            verification.setEmailVerificationToken(verifyToken);
+            verification.setEmailVerificationTokenExpiry(expiryTime);
+            user.setEmailVerification(verification);
+            userRepository.save(user);
+            try {
                 emailSenderService.sendEmail(email, "Account Verification", emailBody);
-                return GlobalResponse.responseHandler("Verification link sent", HttpStatus.OK, null);
+                return GlobalResponse.responseHandler("Account Registered, please check your email to verify your account", HttpStatus.OK, null);
+            } catch (MailSendException e){
+                return GlobalResponse.responseHandler("Account Registered, failed to send the email address, please verify your account after login!", HttpStatus.OK, null);
             }
         } catch (MailException e) {
             return GlobalResponse.responseHandler("Failed to send mail.", HttpStatus.BAD_REQUEST, null);
         } catch (UsernameNotFoundException e) {
             return GlobalResponse.responseHandler(e.getMessage(), HttpStatus.BAD_REQUEST, null);
-        }
-    }
-
-    private User getByVerificationToken(String token) {
-        try {
-            return emailVerificationRepository.findByEmailVerificationToken(token).getUser();
-        } catch (NullPointerException e) {
-            return null;
-        }
-    }
-
-    public ResponseEntity<?> verifyingEmail(String token) {
-        try {
-
-            User user = getByVerificationToken(token);
-            assert user != null;
-            EmailVerification verification = user.getEmailVerification();
-                if (isResetTokenValid(verification.getEmailVerificationTokenExpiry())) {
-                    user.setRole(Role.USER);
-                    emailVerificationRepository.delete(verification);
-                    user.setEmailVerification(null);
-                    userRepository.save(user);
-                    return GlobalResponse.responseHandler("Account has verified", HttpStatus.OK, null);
-                } else {
-                    return GlobalResponse.responseHandler("Token Expired", HttpStatus.BAD_REQUEST, null);
-                }
-        } catch (Exception e) {
-            return GlobalResponse.responseHandler("The request is invalid", HttpStatus.BAD_REQUEST, null);
         }
     }
 
@@ -156,5 +115,32 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             return GlobalResponse.responseHandler(errorMessage, HttpStatus.UNAUTHORIZED, object);
         }
     }
-
+    private User getByVerificationToken(String token) {
+        try {
+            return emailVerificationRepository.findByEmailVerificationToken(token).getUser();
+        } catch (NullPointerException e) {
+            return null;
+        }
+    }
+    public ResponseEntity<?> verifyingEmail(String token) {
+        try {
+            User user = getByVerificationToken(token);
+            assert user != null;
+            EmailVerification verification = user.getEmailVerification();
+            if (isResetTokenValid(verification.getEmailVerificationTokenExpiry())) {
+                user.setRole(Role.USER);
+                emailVerificationRepository.delete(verification);
+                user.setEmailVerification(null);
+                userRepository.save(user);
+                var jwtToken = jwtServiceImpl.generateToken(user);
+                String message = "User verified";
+                object = AuthenticationResponse.builder().token(jwtToken).build();
+                return GlobalResponse.responseHandler("Account has verified", HttpStatus.OK, object);
+            } else {
+                return GlobalResponse.responseHandler("Token Expired", HttpStatus.BAD_REQUEST, null);
+            }
+        } catch (Exception e) {
+            return GlobalResponse.responseHandler("The request is invalid", HttpStatus.BAD_REQUEST, null);
+        }
+    }
 }

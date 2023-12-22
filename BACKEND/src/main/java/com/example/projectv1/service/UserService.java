@@ -11,6 +11,7 @@ import java.io.IOException;
 
 public interface UserService {
     ResponseEntity<?> userWelcome(Authentication authentication);
+    ResponseEntity<?> emailVerification(Authentication authentication);
     ResponseEntity<?> showProfile(Authentication authentication);
     ResponseEntity<?> changePassword(ChangePasswordRequest passwordRequest, Authentication authentication);
     ResponseEntity<?> editProfile(EditProfileRequest editProfileRequest, Authentication authentication);

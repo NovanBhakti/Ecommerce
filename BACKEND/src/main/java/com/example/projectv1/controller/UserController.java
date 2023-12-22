@@ -20,7 +20,6 @@ import java.io.IOException;
 @CrossOrigin(origins = "http://localhost:3000")
 public class UserController {
     private final UserService userService;
-    private final AuthenticationService authenticationService;
 
     @GetMapping("/home")
     public ResponseEntity<?> homePage(Authentication authentication) {
@@ -59,13 +58,8 @@ public class UserController {
     }
 
     @PostMapping("/email-verification")
-    public ResponseEntity<?> verifyAccount(Authentication authentication) {
-        return authenticationService.emailVerification(authentication);
-    }
-
-    @GetMapping("/account-verified")
-    public ResponseEntity<?> resetPassword(@RequestParam String token) {
-        return authenticationService.verifyingEmail(token);
+    public ResponseEntity<?> verifyAccountSendEmail(Authentication authentication) {
+        return userService.emailVerification(authentication);
     }
 }
 

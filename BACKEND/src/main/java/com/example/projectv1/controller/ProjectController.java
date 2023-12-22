@@ -38,4 +38,9 @@ public class ProjectController {
         String confirmPassword = resetPasswordRequest.getConfirmPassword();
         return forgotPasswordService.resetPassword(token, newPassword, confirmPassword);
     }
+
+    @GetMapping("/account-verified")
+    public ResponseEntity<?> verifyingAccount(@RequestParam String token) {
+        return authenticationService.verifyingEmail(token);
+    }
 }
