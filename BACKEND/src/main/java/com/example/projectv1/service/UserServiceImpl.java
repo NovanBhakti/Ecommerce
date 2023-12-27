@@ -55,6 +55,7 @@ public class UserServiceImpl implements UserService {
                                     .firstName(user.getFirstName())
                                     .lastName(user.getLastName())
                                     .email(user.getEmail())
+                                    .role(user.getRole())
                                     .build());
         } catch (Exception e) {
             return GlobalResponse.responseHandler("Bad Token", HttpStatus.UNAUTHORIZED, UserResponse.builder().build());
@@ -72,27 +73,31 @@ public class UserServiceImpl implements UserService {
             User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found!"));
             if (user.getEmailVerification() != null && isResetTokenValid(user.getEmailVerification().getEmailVerificationTokenExpiry())) {
                 return GlobalResponse.responseHandler("Duplicate email verification request!", HttpStatus.BAD_REQUEST, null);
-            } else if (user.getEmailVerification() != null && !isResetTokenValid(user.getEmailVerification().getEmailVerificationTokenExpiry())){
-                LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(1);
-                verification = user.getEmailVerification();
-                verification.setUser(user);
-                verification.setEmailVerificationToken(verifyToken);
-                verification.setEmailVerificationTokenExpiry(expiryTime);
-                user.setEmailVerification(verification);
-                emailSenderService.sendEmail(email, "Account Verification", emailBody);
-                userRepository.save(user);
+            } else if (user.getRole().equals(Role.NOT_VERIFIED)){
+                if (user.getEmailVerification() != null && !isResetTokenValid(user.getEmailVerification().getEmailVerificationTokenExpiry())){
+                    LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(1);
+                    verification = user.getEmailVerification();
+                    verification.setUser(user);
+                    verification.setEmailVerificationToken(verifyToken);
+                    verification.setEmailVerificationTokenExpiry(expiryTime);
+                    user.setEmailVerification(verification);
+                    emailSenderService.sendEmail(email, "Account Verification", emailBody);
+                    userRepository.save(user);
 
-                return GlobalResponse.responseHandler("Verification link request has resent", HttpStatus.OK, null);
+                    return GlobalResponse.responseHandler("Verification link request has resent", HttpStatus.OK, null);
+                } else {
+                    verification = new EmailVerification();
+                    LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(1);
+                    verification.setUser(user);
+                    verification.setEmailVerificationToken(verifyToken);
+                    verification.setEmailVerificationTokenExpiry(expiryTime);
+                    user.setEmailVerification(verification);
+                    userRepository.save(user);
+                    emailSenderService.sendEmail(email, "Account Verification", emailBody);
+                    return GlobalResponse.responseHandler("Verification link sent", HttpStatus.OK, null);
+                }
             } else {
-                verification = new EmailVerification();
-                LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(1);
-                verification.setUser(user);
-                verification.setEmailVerificationToken(verifyToken);
-                verification.setEmailVerificationTokenExpiry(expiryTime);
-                user.setEmailVerification(verification);
-                userRepository.save(user);
-                emailSenderService.sendEmail(email, "Account Verification", emailBody);
-                return GlobalResponse.responseHandler("Verification link sent", HttpStatus.OK, null);
+                return GlobalResponse.responseHandler("Account already verified", HttpStatus.OK, null);
             }
         } catch (MailException e) {
             return GlobalResponse.responseHandler("Failed to send mail.", HttpStatus.BAD_REQUEST, null);
@@ -117,6 +122,7 @@ public class UserServiceImpl implements UserService {
                             .address(user.getAddress())
                             .gender(user.getGender())
                             .profilePicture(base64Image)
+                            .role(user.getRole())
                             .build());
         } catch (Exception e){
             return GlobalResponse.responseHandler(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, null);

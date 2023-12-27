@@ -57,7 +57,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             object = AuthenticationResponse.builder().build();
             return GlobalResponse.responseHandler(message, HttpStatus.BAD_REQUEST, object);
         }
-
+        System.out.println(user.getRole());
         userRepository.save(user);
         return emailVerificationOnRegister(registerRequest.getEmail());
     }
@@ -106,7 +106,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             var jwtToken = jwtServiceImpl.generateToken(user);
 
             String message = "User authenticated successfully";
-            object = AuthenticationResponse.builder().token(jwtToken).build();
+            object = AuthenticationResponse.builder().token(jwtToken).role(user.getRole()).build();
             return GlobalResponse.responseHandler(message, HttpStatus.OK, object);
         } catch (AuthenticationException e) {
             // Handle authentication failure, e.g., invalid credentials
@@ -129,12 +129,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             EmailVerification verification = user.getEmailVerification();
             if (isResetTokenValid(verification.getEmailVerificationTokenExpiry())) {
                 user.setRole(Role.USER);
-                emailVerificationRepository.delete(verification);
                 user.setEmailVerification(null);
+                emailVerificationRepository.delete(verification);
                 userRepository.save(user);
                 var jwtToken = jwtServiceImpl.generateToken(user);
                 String message = "User verified";
                 object = AuthenticationResponse.builder().token(jwtToken).build();
+
                 return GlobalResponse.responseHandler("Account has verified", HttpStatus.OK, object);
             } else {
                 return GlobalResponse.responseHandler("Token Expired", HttpStatus.BAD_REQUEST, null);
