@@ -48,18 +48,6 @@ public class JwtServiceImpl implements JwtService {
                 .compact();
     }
 
-    public String generateResetToken(String email) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("sub", email); // Set the subject as email for password reset
-        claims.put("iat", new Date(System.currentTimeMillis()));
-        claims.put("exp", new Date(System.currentTimeMillis() + 1000 * 60 * 24)); // Set your desired expiration time
-
-        return Jwts.builder()
-                .setClaims(claims)
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
-                .compact();
-    }
-
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }

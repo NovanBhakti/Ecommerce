@@ -13,9 +13,5 @@ public class EditProfileRequest {
     private String firstName;
     private String lastName;
     private String dobString;
-    private String country;
-    private String state;
-    private String city;
-    private String address;
     private String gender;
 }

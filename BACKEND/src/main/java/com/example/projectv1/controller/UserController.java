@@ -1,10 +1,8 @@
 package com.example.projectv1.controller;
 
-import com.example.projectv1.request.ChangePasswordRequest;
-import com.example.projectv1.request.EditProfileRequest;
-import com.example.projectv1.request.ForgotPasswordRequest;
-import com.example.projectv1.request.ResetPasswordRequest;
+import com.example.projectv1.request.*;
 import com.example.projectv1.service.AuthenticationService;
+import com.example.projectv1.service.UserAddressService;
 import com.example.projectv1.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +18,7 @@ import java.io.IOException;
 @CrossOrigin(origins = "http://localhost:3000")
 public class UserController {
     private final UserService userService;
+    private final UserAddressService userAddressService;
 
     @GetMapping("/home")
     public ResponseEntity<?> homePage(Authentication authentication) {
@@ -60,6 +59,26 @@ public class UserController {
     @PostMapping("/email-verification")
     public ResponseEntity<?> verifyAccountSendEmail(Authentication authentication) {
         return userService.emailVerification(authentication);
+    }
+
+    @PostMapping("/address")
+    public ResponseEntity<?> addUserAddress(Authentication authentication, @RequestBody AddressRequest addressRequest){
+        return userAddressService.addAddress(authentication, addressRequest);
+    }
+
+    @GetMapping("/address")
+    public ResponseEntity<?> showUserAddress(Authentication authentication){
+        return userAddressService.showAllAddress(authentication);
+    }
+
+    @PutMapping("/address")
+    public ResponseEntity<?> editUserAdress(Authentication authentication, @RequestBody AddressRequest addressRequest, @RequestParam Integer id){
+        return userAddressService.editAddress(authentication, addressRequest, id);
+    }
+
+    @DeleteMapping("/address")
+    public ResponseEntity<?> deleteUserAddress(Authentication authentication, @RequestParam Integer id){
+        return userAddressService.removeAddress(authentication, id);
     }
 }
 

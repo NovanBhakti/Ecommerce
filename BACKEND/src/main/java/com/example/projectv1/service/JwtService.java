@@ -12,7 +12,6 @@ public interface JwtService {
     <T> T extractClaim(String token, Function<Claims, T> claimsResolver);
     String generateToken(UserDetails userDetails);
     String generateToken(Map<String, Object> extraClaims, UserDetails userDetails);
-    public String generateResetToken(String email);
     boolean isTokenValid(String token, UserDetails userDetails);
     String extractUsername(String token);
 }

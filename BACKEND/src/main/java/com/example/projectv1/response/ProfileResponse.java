@@ -18,10 +18,6 @@ public class ProfileResponse {
     private String firstName;
     private String lastName;
     private LocalDate dob;
-    private String country;
-    private String state;
-    private String city;
-    private String address;
     private String gender;
     private Integer age;
     private String profilePicture;

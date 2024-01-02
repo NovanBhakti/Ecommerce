@@ -7,6 +7,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -30,6 +31,9 @@ public class User implements UserDetails {
     @JoinColumn(name = "email_verification_id")
     private EmailVerification emailVerification;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserAddress> userAddress = new ArrayList<>();
+
     @Id
     @GeneratedValue
     private Integer id;
@@ -40,14 +44,6 @@ public class User implements UserDetails {
     private String lastName;
 
     private LocalDate dob;
-
-    private String country;
-
-    private String state;
-
-    private String city;
-
-    private String address;
 
     private String gender;
 

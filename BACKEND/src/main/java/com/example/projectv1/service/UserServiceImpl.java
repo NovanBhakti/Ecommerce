@@ -116,10 +116,6 @@ public class UserServiceImpl implements UserService {
                             .firstName(user.getFirstName())
                             .lastName(user.getLastName())
                             .dob(user.getDob())
-                            .country(user.getCountry())
-                            .state(user.getState())
-                            .city(user.getCity())
-                            .address(user.getAddress())
                             .gender(user.getGender())
                             .profilePicture(base64Image)
                             .role(user.getRole())
@@ -183,22 +179,6 @@ public class UserServiceImpl implements UserService {
                 updatedFields.append("dob user is under age, ");
             }
         }
-        if (!(editProfileRequest.getCountry().isEmpty()) && !(editProfileRequest.getCountry().equals(user.getCountry()))) {
-            user.setCountry(editProfileRequest.getCountry());
-            updatedFields.append("country, ");
-        }
-        if (!(editProfileRequest.getState().isEmpty()) && !(editProfileRequest.getState().equals(user.getState()))) {
-            user.setState(editProfileRequest.getState());
-            updatedFields.append("state, ");
-        }
-        if (!(editProfileRequest.getCity().isEmpty()) && !(editProfileRequest.getCity().equals(user.getCity()))) {
-            user.setCity(editProfileRequest.getCity());
-            updatedFields.append("city, ");
-        }
-        if (!(editProfileRequest.getAddress().isEmpty()) && !(editProfileRequest.getAddress().equals(user.getAddress()))) {
-            user.setAddress(editProfileRequest.getAddress());
-            updatedFields.append("address, ");
-        }
         if (!(editProfileRequest.getGender().isEmpty()) && !(editProfileRequest.getGender().equals(user.getGender()))) {
             user.setGender(editProfileRequest.getGender());
             updatedFields.append("gender, ");
@@ -217,10 +197,6 @@ public class UserServiceImpl implements UserService {
                         .firstName(user.getFirstName())
                         .lastName(user.getLastName())
                         .dob(user.getDob())
-                        .country(user.getCountry())
-                        .state(user.getState())
-                        .city(user.getCity())
-                        .address(user.getAddress())
                         .gender(user.getGender())
                         .age(age)
                         .build());
